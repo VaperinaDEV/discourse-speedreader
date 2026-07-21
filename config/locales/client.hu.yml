@@ -1,0 +1,37 @@
+hu:
+  js:
+    speedreader:
+      title: "Gyorsolvasó"
+      nav_label: "Gyorsolvasó"
+      library:
+        title: "Könyveim"
+        upload_button: "PDF feltöltése"
+        uploading: "Feltöltés… %{percent}%"
+        processing: "Feldolgozás: %{page} / %{total}. oldal…"
+        empty: "Még nincs feltöltött könyved — tölts fel egy PDF-et fent."
+        continue_reading: "Folytatás"
+        start_reading: "Olvasás"
+        delete: "Törlés"
+        delete_confirm: "Biztosan törlöd ezt a könyvet? Ez nem vonható vissza."
+        words_count: "%{count} szó"
+        pages_count: "%{count} oldal"
+      reader:
+        loading: "Betöltés…"
+        back_to_library: "Vissza a könyvtárhoz"
+        play: "Lejátszás"
+        pause: "Szünet"
+        back_words: "10 szó vissza"
+        forward_words: "10 szó előre"
+        previous_sentence: "Előző mondat"
+        next_sentence: "Következő mondat"
+        speed_label: "Sebesség"
+        wpm_unit: "szó/p"
+        chunk_toggle: "Rövid szavak összevonása"
+        time_remaining: "Hátralévő idő: kb. %{time}"
+        words_progress: "%{current} / %{total} szó"
+        position_saved: "Pozíció mentve"
+      errors:
+        select_pdf_file: "Válassz ki egy PDF fájlt."
+        file_too_large: "Ez a fájl nagyobb, mint a megengedett %{mb} MB-os feltöltési korlát."
+        upload_failed: "Hiba történt a feltöltés közben. Próbáld újra."
+        pdfjs_load_failed: "Nem sikerült betölteni a PDF-feldolgozó könyvtárat. Ellenőrizd a kapcsolatot, és próbáld újra."

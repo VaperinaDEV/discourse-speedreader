@@ -1,0 +1,92 @@
+// Speedreader — base styles, scoped under .speedreader so it never
+// clashes with the rest of the theme.
+
+.speedreader {
+  --sr-bg: #15110d;
+  --sr-bg-2: #1c1610;
+  --sr-panel: #211a13;
+  --sr-panel-2: #2a2116;
+  --sr-parchment: #ede1c3;
+  --sr-parchment-dim: #c9bb98;
+  --sr-ember: #d3541b;
+  --sr-ember-bright: #f0743a;
+  --sr-ember-deep: #7c2a0e;
+  --sr-gold: #b6903f;
+  --sr-gold-dim: #8a6e35;
+  --sr-muted: #8d8170;
+  --sr-line: #382c1f;
+
+  font-family: var(--font-family, serif);
+  color: var(--sr-parchment);
+
+  .sr-stage {
+    background: linear-gradient(180deg, var(--sr-panel) 0%, var(--sr-bg-2) 100%);
+    border: 1px solid var(--sr-line);
+    border-radius: 14px;
+    padding: 38px 20px 26px;
+    position: relative;
+  }
+
+  .sr-word-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    height: 5.2rem;
+  }
+  .sr-word-before,
+  .sr-word-after {
+    flex: 1 1 0;
+    min-width: 0;
+    font-size: 2.6rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .sr-word-before { text-align: right; }
+  .sr-word-after { text-align: left; }
+  .sr-word-pivot {
+    flex: 0 0 auto;
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: var(--sr-ember-bright);
+    text-shadow: 0 0 22px rgba(211, 84, 27, 0.55);
+  }
+
+  .sr-fuse-track {
+    position: relative;
+    height: 8px;
+    border-radius: 5px;
+    background: #241b12;
+    cursor: pointer;
+  }
+  .sr-fuse-fill {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    border-radius: 5px 0 0 5px;
+    background: linear-gradient(90deg, var(--sr-ember-deep), var(--sr-ember) 65%, var(--sr-ember-bright));
+  }
+
+  .sr-btn-play {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--sr-ember-bright), var(--sr-ember) 55%, var(--sr-ember-deep) 100%);
+    border: 1px solid #5c1f0a;
+    cursor: pointer;
+  }
+
+  .sr-book-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(180deg, var(--sr-panel) 0%, var(--sr-bg-2) 100%);
+    border: 1px solid var(--sr-line);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 520px) {
+    .sr-word-before, .sr-word-after, .sr-word-pivot { font-size: 1.7rem; }
+    .sr-word-row { height: 3.6rem; }
+  }
+}

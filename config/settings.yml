@@ -1,0 +1,49 @@
+plugins:
+  speedreader_enabled:
+    client: true
+    default: true
+
+  # The reader will start at this speed when it starts if the user
+  # does not yet have a saved preference.
+  speedreader_default_wpm:
+    client: true
+    default: 300
+    min: 50
+    max: 2000
+
+  # Lower/upper limit of the speed slider in the reader.
+  speedreader_min_wpm:
+    client: true
+    default: 100
+    min: 50
+    max: 1000
+
+  speedreader_max_wpm:
+    client: true
+    default: 900
+    min: 200
+    max: 3000
+
+  # Maximum number of words that can be extracted from a document (protection a 
+  # against outrageously large files).
+  speedreader_max_words_per_book:
+    client: true
+    default: 400000
+    min: 1000
+    max: 3000000
+
+  # Maximum size of PDF that can be uploaded in megabytes.
+  speedreader_max_upload_size_mb:
+    client: true
+    default: 80
+    min: 1
+    max: 500
+
+  # Basically a "short word", it can be combined with the following word 
+  # list of conjunctions / nouns (reader "short words merge"for the
+  # function). Can be customized per language/community.
+  speedreader_chunk_words:
+    client: true
+    type: list
+    list_type: compact
+    default: "a|az|és|s|de|ha|hogy|is|meg|nem|egy|e|ő|ők"
