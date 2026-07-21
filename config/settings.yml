@@ -3,15 +3,15 @@ plugins:
     client: true
     default: true
 
-  # The reader will start at this speed when it starts if the user
-  # does not yet have a saved preference.
+  # Az olvasó induláskor ezzel a sebességgel indul, ha a felhasználónak
+  # még nincs mentett preferenciája.
   speedreader_default_wpm:
     client: true
     default: 300
     min: 50
     max: 2000
 
-  # Lower/upper limit of the speed slider in the reader.
+  # A sebességcsúszka alsó / felső határa a felolvasóban.
   speedreader_min_wpm:
     client: true
     default: 100
@@ -24,24 +24,24 @@ plugins:
     min: 200
     max: 3000
 
-  # Maximum number of words that can be extracted from a document (protection a 
-  # against outrageously large files).
+  # Egy dokumentumból kinyerhető szavak maximális száma (védelem a
+  # kirívóan nagy fájlok ellen).
   speedreader_max_words_per_book:
     client: true
     default: 400000
     min: 1000
     max: 3000000
 
-  # Maximum size of PDF that can be uploaded in megabytes.
+  # Feltölthető PDF maximális mérete megabájtban.
   speedreader_max_upload_size_mb:
     client: true
     default: 80
     min: 1
     max: 500
 
-  # Basically a "short word", it can be combined with the following word 
-  # list of conjunctions / nouns (reader "short words merge"for the
-  # function). Can be customized per language/community.
+  # Alapból "rövid szónak" számító, a következő szóval összevonható
+  # kötőszók / névelők listája (a felolvasó "rövid szavak összevonása"
+  # funkciójához). Nyelvenként/közösségenként testre szabható.
   speedreader_chunk_words:
     client: true
     type: list
