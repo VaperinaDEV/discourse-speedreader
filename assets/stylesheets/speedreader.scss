@@ -13,6 +13,9 @@
   --sr-muted: var(--primary-high);
   --sr-line: var(--primary-300);
   --sr-font-size: 2.6rem;
+  @media (max-width: 520px) {
+    --sr-font-size: 1.7rem;
+  }
 
   margin: 0 auto;
   padding: 2em;
@@ -282,7 +285,6 @@
   }
 
   @media (max-width: 520px) {
-    .sr-word-before, .sr-word-after, .sr-word-pivot { font-size: 1.7rem; }
     .sr-word-row { height: 3.6rem; }
     .sr-book-title h1 { font-size: 0.95rem; }
   }
