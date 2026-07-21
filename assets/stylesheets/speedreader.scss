@@ -131,10 +131,14 @@
     height: 5.2rem;
   }
   .sr-word-before,
+  .sr-word-pivot,
+  .sr-word-after {
+    font-size: var(--sr-font-size);
+  }
+  .sr-word-before,
   .sr-word-after {
     flex: 1 1 0;
     min-width: 0;
-    font-size: 2.6rem;
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
@@ -143,7 +147,6 @@
   .sr-word-after { text-align: left; }
   .sr-word-pivot {
     flex: 0 0 auto;
-    font-size: 2.6rem;
     font-weight: 700;
     color: var(--sr-ember-bright);
     text-shadow: 0 0 22px rgba(var(--tertiary-rgb), 0.5);
