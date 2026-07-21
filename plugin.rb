@@ -23,6 +23,12 @@ after_initialize do
   require_relative "app/models/speedreader_progress"
   require_relative "app/controllers/discourse_speedreader/books_controller"
 
+  # Ensure client-side routes under /speedreader return the Discourse HTML
+  # so the Ember router can take over on refresh/initial load.
+  Discourse::Application.routes.prepend do
+    get "/speedreader(/*path)" => "list#latest", constraints: ->(request) { request.format.html? }
+  end
+
   DiscourseSpeedreader::Engine.routes.draw do
     get "/books" => "books#index"
     post "/books" => "books#create"
