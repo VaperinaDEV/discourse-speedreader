@@ -19,6 +19,8 @@ en:
         loading: "Loading…"
         back_to_library: "Back to library"
         play: "Play"
+        key_play: "Start/Stop"
+        key_font: "Font size"
         pause: "Pause"
         back_words: "Back 10 words"
         forward_words: "Forward 10 words"
