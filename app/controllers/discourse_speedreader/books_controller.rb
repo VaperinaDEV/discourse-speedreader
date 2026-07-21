@@ -13,11 +13,11 @@ module DiscourseSpeedreader
     end
 
     def create
-      pdf = params[:pdf]
-      raise Discourse::InvalidParameters.new(:pdf) if pdf.blank?
+      uploaded = params[:file] || params[:pdf]
+      raise Discourse::InvalidParameters.new(:file) if uploaded.blank?
 
       max_upload_bytes = SiteSetting.speedreader_max_upload_size_mb.megabytes
-      if pdf.size.to_i > max_upload_bytes
+      if uploaded.size.to_i > max_upload_bytes
         return render_json_error(
           I18n.t("speedreader.errors.file_too_large", mb: SiteSetting.speedreader_max_upload_size_mb),
           status: 413,
@@ -37,15 +37,19 @@ module DiscourseSpeedreader
         )
       end
 
-      upload = UploadCreator.new(pdf.tempfile, pdf.original_filename, type: "speedreader")
+      upload = UploadCreator.new(uploaded.tempfile, uploaded.original_filename, type: "speedreader")
                              .create_for(current_user.id)
       unless upload.persisted?
         return render_json_error(upload.errors.full_messages.join(", "), status: 422)
       end
 
+      # derive a title by stripping any extension
+      filename = uploaded.original_filename.to_s
+      title_guess = params[:title].presence || filename.sub(/\.[^.]+\z/, "")
+
       book = SpeedreaderBook.create!(
         user_id: current_user.id,
-        title: params[:title].presence || pdf.original_filename.to_s.sub(/\.pdf\z/i, ""),
+        title: title_guess,
         author: params[:author].presence,
         page_count: params[:page_count].to_i,
         word_count: words.size,
@@ -68,6 +72,7 @@ module DiscourseSpeedreader
         progress: {
           word_index: progress&.word_index || 0,
           wpm: progress&.wpm || SiteSetting.speedreader_default_wpm,
+          font_size: progress&.font_size || 2.6,
         },
       }
     end
@@ -87,6 +92,9 @@ module DiscourseSpeedreader
       progress = SpeedreaderProgress.find_or_initialize_by(user_id: current_user.id, book_id: book.id)
       progress.word_index = params[:word_index].to_i.clamp(0, max_index)
       progress.wpm = params[:wpm].to_i.clamp(min_wpm, max_wpm)
+      if params[:font_size]
+        progress.font_size = params[:font_size].to_f.clamp(1.0, 4.0)
+      end
       progress.save!
 
       render json: success_json

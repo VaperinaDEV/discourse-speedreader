@@ -8,7 +8,7 @@ import { LinkTo } from "@ember/routing";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import { i18n } from "discourse-i18n";
-import { extractPdf } from "../lib/speedreader-pdf";
+import { extractFile } from "../lib/speedreader-file";
 
 export default class SpeedreaderLibrary extends Component {
   @service siteSettings;
@@ -41,26 +41,27 @@ export default class SpeedreaderLibrary extends Component {
     this.uploadStatusText = i18n("speedreader.library.uploading", { percent: 0 });
 
     try {
-      const extracted = await extractPdf(file, (ratio, page, total) => {
+      const extracted = await extractFile(file, (ratio, page, total) => {
         this.uploadStatusText = i18n("speedreader.library.processing", { page, total });
       });
 
       const formData = new FormData();
-      formData.append("pdf", file);
+      // send as 'file' so controller can handle arbitrary formats
+      formData.append("file", file);
       formData.append("words", JSON.stringify(extracted.words));
       formData.append("pages", JSON.stringify(extracted.pages));
       formData.append("page_count", extracted.numPages);
       if (extracted.title) formData.append("title", extracted.title);
       if (extracted.author) formData.append("author", extracted.author);
 
-      await ajax("/speedreader/books", {
+      await ajax("/speedreader-api/books", {
         type: "POST",
         data: formData,
         processData: false,
         contentType: false,
       });
 
-      const { books } = await ajax("/speedreader/books");
+      const { books } = await ajax("/speedreader-api/books");
       this.books = books;
     } catch (e) {
       popupAjaxError(e);
@@ -73,7 +74,7 @@ export default class SpeedreaderLibrary extends Component {
   async deleteBook(book) {
     if (!window.confirm(i18n("speedreader.library.delete_confirm"))) return;
     try {
-      await ajax(`/speedreader/books/${book.id}`, { type: "DELETE" });
+      await ajax(`/speedreader-api/books/${book.id}`, { type: "DELETE" });
       this.books = this.books.filter((b) => b.id !== book.id);
     } catch (e) {
       popupAjaxError(e);
@@ -89,7 +90,7 @@ export default class SpeedreaderLibrary extends Component {
         <input
           type="file"
           id="speedreader-pdf-input"
-          accept="application/pdf,.pdf"
+          accept="application/pdf,.pdf,.txt,.md,.docx,.epub"
           hidden
           {{on "change" this.onFileSelected}}
         />

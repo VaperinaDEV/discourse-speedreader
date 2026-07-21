@@ -1,17 +1,17 @@
 .speedreader {
-  --sr-bg: #15110d;
-  --sr-bg-2: #1c1610;
-  --sr-panel: #211a13;
-  --sr-panel-2: #2a2116;
-  --sr-parchment: #ede1c3;
-  --sr-parchment-dim: #c9bb98;
-  --sr-ember: #d3541b;
-  --sr-ember-bright: #f0743a;
-  --sr-ember-deep: #7c2a0e;
-  --sr-gold: #b6903f;
-  --sr-gold-dim: #8a6e35;
-  --sr-muted: #8d8170;
-  --sr-line: #382c1f;
+  --sr-bg: var(--d-element-bg);
+  --sr-bg-2: var(--d-element-bg-hover);
+  --sr-panel: var(--d-element-bg-hex);
+  --sr-panel-2: var(--d-element-bg-hex);
+  --sr-parchment: var(--primary);
+  --sr-parchment-dim: var(--primary-high);
+  --sr-ember: var(--tertiary);
+  --sr-ember-bright: var(--tertiary);
+  --sr-ember-deep: var(--tertiary-hover);
+  --sr-gold: var(--tertiary);
+  --sr-gold-dim: var(--tertiary-hover);
+  --sr-muted: var(--primary-high);
+  --sr-line: var(--primary-300);
 
   margin: 0 auto;
   padding: 2em;
@@ -119,7 +119,7 @@
     width: 1px;
     height: 14px;
     background: var(--sr-gold-dim);
-    opacity: 0.55;
+    opacity: 0.85;
   }
   .sr-guide-top { top: 12px; transform: translateX(-50%); }
   .sr-guide-bottom { bottom: 12px; transform: translateX(-50%); }
@@ -146,7 +146,7 @@
     font-size: 2.6rem;
     font-weight: 700;
     color: var(--sr-ember-bright);
-    text-shadow: 0 0 22px rgba(211, 84, 27, 0.55);
+    text-shadow: 0 0 22px rgba(var(--tertiary-rgb), 0.5);
   }
 
   .sr-meta-row {
@@ -183,7 +183,7 @@
     border-radius: 50%;
     background: radial-gradient(circle, #fff3d6 0%, var(--sr-ember-bright) 45%, var(--sr-ember) 75%, transparent 78%);
     transform: translate(-50%, -50%);
-    box-shadow: 0 0 10px 3px rgba(211, 84, 27, 0.5);
+    box-shadow: 0 0 10px 3px rgba(var(--tertiary-rgb), 0.5);
   }
 
   // ---------- Controls ----------
@@ -250,12 +250,31 @@
     color: var(--sr-muted);
   }
 
+  .sr-size-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: var(--sr-parchment-dim);
+    button { 
+      min-width: 36px; 
+    }
+  }
+
   .sr-hint-row {
     margin-top: 14px;
     text-align: center;
     font-size: 0.78rem;
     color: var(--sr-muted);
     min-height: 1.2em;
+  }
+
+  .sr-key-hints {
+    margin-top: 8px;
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--sr-parchment-dim);
+    opacity: 0.95;
   }
 
   @media (max-width: 520px) {

@@ -24,6 +24,7 @@ export default class SpeedreaderReader extends Component {
     this.args.model.progress.wpm || this.siteSettings.speedreader_default_wpm || 300;
   @tracked chunkMode = false;
   @tracked justSaved = false;
+  @tracked fontSize = parseFloat(this.args.model.progress.font_size) || 2.6;
 
   timer = null;
   saveTimer = null;
@@ -34,6 +35,10 @@ export default class SpeedreaderReader extends Component {
     this.buildDisplayUnits();
     const startWordIndex = this.args.model.progress.word_index || 0;
     this.dIdx = this.displayIndexFor(startWordIndex);
+
+    // apply initial font size to the root .speedreader element if present
+    const el = document.querySelector('.speedreader');
+    if (el) el.style.setProperty('--sr-font-size', `${this.fontSize}rem`);
 
     this._onKeyDown = this.onKeyDown.bind(this);
     this._onMouseMove = this.onFuseDrag.bind(this);
@@ -280,6 +285,32 @@ export default class SpeedreaderReader extends Component {
     this.seekToWordIndex(Math.round(ratio * (this.totalWords - 1)));
   }
 
+  increaseFontStep(step = 0.2) {
+    const min = 1.0;
+    const max = 4.0;
+    this.fontSize = Math.min(max, +(this.fontSize + step).toFixed(2));
+    document.querySelector('.speedreader')?.style.setProperty('--sr-font-size', `${this.fontSize}rem`);
+  }
+
+  decreaseFontStep(step = 0.2) {
+    const min = 1.0;
+    const max = 4.0;
+    this.fontSize = Math.max(min, +(this.fontSize - step).toFixed(2));
+    document.querySelector('.speedreader')?.style.setProperty('--sr-font-size', `${this.fontSize}rem`);
+  }
+
+  @action
+  increaseFont() {
+    this.increaseFontStep();
+    this.saveProgress();
+  }
+
+  @action
+  decreaseFont() {
+    this.decreaseFontStep();
+    this.saveProgress();
+  }
+
   onKeyDown(event) {
     if (event.target.tagName === "SELECT" || event.target.tagName === "INPUT") return;
     const min = this.siteSettings.speedreader_min_wpm || 100;
@@ -302,15 +333,21 @@ export default class SpeedreaderReader extends Component {
       event.preventDefault();
       this.wpm = Math.max(min, this.wpm - 25);
       this.saveProgress();
+    } else if (event.key === "+" || event.key === "=") {
+      event.preventDefault();
+      this.increaseFont();
+    } else if (event.key === "-") {
+      event.preventDefault();
+      this.decreaseFont();
     }
   }
 
   saveProgress(immediate) {
     clearTimeout(this.saveTimer);
     const doSave = () => {
-      ajax(`/speedreader/books/${this.book.id}/progress`, {
+      ajax(`/speedreader-api/books/${this.book.id}/progress`, {
         type: "PUT",
-        data: { word_index: this.currentWordIndex, wpm: this.wpm },
+        data: { word_index: this.currentWordIndex, wpm: this.wpm, font_size: this.fontSize },
       })
         .then(() => {
           this.justSaved = true;
@@ -388,10 +425,19 @@ export default class SpeedreaderReader extends Component {
           <input type="checkbox" checked={{this.chunkMode}} {{on "change" this.onChunkToggle}} />
           {{i18n "speedreader.reader.chunk_toggle"}}
         </label>
+        <div class="sr-size-controls">
+          <button type="button" class="btn" {{on "click" this.decreaseFont}}>-</button>
+          <div class="sr-size-value">{{this.fontSize}} rem</div>
+          <button type="button" class="btn btn-primary" {{on "click" this.increaseFont}}>+</button>
+        </div>
       </div>
 
       <div class="sr-hint-row">
         {{#if this.justSaved}}{{i18n "speedreader.reader.position_saved"}}{{/if}}
+      </div>
+
+      <div class="sr-key-hints">
+        Space: {{i18n "speedreader.reader.key_play"}} · ←/→: 10 · ↑/↓: WPM · +/-: {{i18n "speedreader.reader.key_font"}}
       </div>
     </div>
   </template>
