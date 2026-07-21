@@ -16,9 +16,10 @@
   --sr-muted: #8d8170;
   --sr-line: #382c1f;
 
-  max-width: 760px;
   margin: 0 auto;
-  padding: 20px 12px 60px;
+  padding: 2em;
+  background: var(--sr-bg);
+  border-radius: 1em;
   font-family: var(--font-family, serif);
   color: var(--sr-parchment);
 
