@@ -388,7 +388,6 @@ export default class SpeedreaderReader extends Component {
     else this.saveTimer = setTimeout(doSave, 800);
   }
 
-  // NEW: update the selectedPageIndex to match the current word position
   updateSelectedPage() {
     if (!Array.isArray(this.pages) || this.pages.length === 0) {
       this.selectedPageIndex = 0;
