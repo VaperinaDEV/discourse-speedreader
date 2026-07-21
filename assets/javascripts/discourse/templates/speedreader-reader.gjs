@@ -26,6 +26,12 @@ export default class SpeedreaderReader extends Component {
   @tracked justSaved = false;
   @tracked fontSize = parseFloat(this.args.model.progress.font_size) || 2.6;
 
+  // track which page index is selected in the UI so the <select> follows playback
+  @tracked selectedPageIndex = 0;
+
+  // reference to the root DOM element, set via did-insert
+  element = null;
+
   timer = null;
   saveTimer = null;
   dragging = false;
@@ -36,9 +42,8 @@ export default class SpeedreaderReader extends Component {
     const startWordIndex = this.args.model.progress.word_index || 0;
     this.dIdx = this.displayIndexFor(startWordIndex);
 
-    // apply initial font size to the root .speedreader element if present
-    const el = document.querySelector('.speedreader');
-    if (el) el.style.setProperty('--sr-font-size', `${this.fontSize}rem`);
+    // initialize selected page based on startWordIndex
+    this.updateSelectedPage();
 
     this._onKeyDown = this.onKeyDown.bind(this);
     this._onMouseMove = this.onFuseDrag.bind(this);
@@ -56,6 +61,20 @@ export default class SpeedreaderReader extends Component {
     window.removeEventListener("mousemove", this._onMouseMove);
     window.removeEventListener("mouseup", this._onMouseUp);
     this.saveProgress(true);
+  }
+
+  @action
+  setupElement(el) {
+    this.element = el;
+    // ensure font size is within allowed bounds and apply it
+    const applied = Math.min(4.0, Math.max(1.0, +this.fontSize));
+    this.fontSize = applied;
+    el.style.setProperty('--sr-font-size', `${this.fontSize}rem`);
+  }
+
+  @action
+  teardownElement() {
+    this.element = null;
   }
 
   get chunkWordsList() {
@@ -84,6 +103,8 @@ export default class SpeedreaderReader extends Component {
       }
     }
     this.displayUnits = out;
+    // after rebuilding units, ensure the selected page still follows the current index
+    this.updateSelectedPage();
   }
 
   displayIndexFor(wordIdx) {
@@ -177,6 +198,8 @@ export default class SpeedreaderReader extends Component {
     const unit = this.displayUnits[this.dIdx];
     this.timer = setTimeout(() => {
       this.dIdx = this.dIdx + 1;
+      // update selected page whenever we advance
+      this.updateSelectedPage();
       this.scheduleNext();
     }, this.delayForUnit(unit.text));
   }
@@ -203,6 +226,8 @@ export default class SpeedreaderReader extends Component {
   seekToWordIndex(newIdx) {
     const clamped = Math.max(0, Math.min(this.totalWords - 1, newIdx));
     this.dIdx = this.displayIndexFor(clamped);
+    // ensure the select follows the new index
+    this.updateSelectedPage();
     if (this.playing) this.scheduleNext();
   }
 
@@ -251,12 +276,16 @@ export default class SpeedreaderReader extends Component {
     this.chunkMode = event.target.checked;
     this.buildDisplayUnits();
     this.dIdx = this.displayIndexFor(wordIdx);
+    // ensure page select updates after chunk mode change
+    this.updateSelectedPage();
   }
 
   @action
   onPageSelect(event) {
+    // event.target.value is a page index (word index to jump to)
+    const idx = parseInt(event.target.value, 10);
     this.pause();
-    this.seekToWordIndex(parseInt(event.target.value, 10));
+    this.seekToWordIndex(idx);
   }
 
   @action
@@ -289,14 +318,14 @@ export default class SpeedreaderReader extends Component {
     const min = 1.0;
     const max = 4.0;
     this.fontSize = Math.min(max, +(this.fontSize + step).toFixed(2));
-    document.querySelector('.speedreader')?.style.setProperty('--sr-font-size', `${this.fontSize}rem`);
+    if (this.element) this.element.style.setProperty('--sr-font-size', `${this.fontSize}rem`);
   }
 
   decreaseFontStep(step = 0.2) {
     const min = 1.0;
     const max = 4.0;
     this.fontSize = Math.max(min, +(this.fontSize - step).toFixed(2));
-    document.querySelector('.speedreader')?.style.setProperty('--sr-font-size', `${this.fontSize}rem`);
+    if (this.element) this.element.style.setProperty('--sr-font-size', `${this.fontSize}rem`);
   }
 
   @action
@@ -359,8 +388,26 @@ export default class SpeedreaderReader extends Component {
     else this.saveTimer = setTimeout(doSave, 800);
   }
 
+  // NEW: update the selectedPageIndex to match the current word position
+  updateSelectedPage() {
+    if (!Array.isArray(this.pages) || this.pages.length === 0) {
+      this.selectedPageIndex = 0;
+      return;
+    }
+    // find the last page entry whose index <= currentWordIndex
+    let found = null;
+    for (let i = this.pages.length - 1; i >= 0; i--) {
+      if (this.pages[i].index <= this.currentWordIndex) {
+        found = this.pages[i];
+        break;
+      }
+    }
+    if (!found) found = this.pages[0];
+    this.selectedPageIndex = found.index;
+  }
+
   <template>
-    <div class="speedreader">
+    <div class="speedreader" {{did-insert this.setupElement}} {{will-destroy this.teardownElement}}>
       <div class="sr-topbar">
         <LinkTo @route="speedreader-library" class="sr-back-link">
           {{i18n "speedreader.reader.back_to_library"}}
@@ -369,7 +416,7 @@ export default class SpeedreaderReader extends Component {
           <h1>{{this.book.title}}</h1>
           {{#if this.book.author}}<div class="sr-book-author">{{this.book.author}}</div>{{/if}}
         </div>
-        <select {{on "change" this.onPageSelect}}>
+        <select value={{this.selectedPageIndex}} {{on "change" this.onPageSelect}}>
           {{#each this.pages as |pm|}}
             <option value={{pm.index}}>{{pm.page}}</option>
           {{/each}}
