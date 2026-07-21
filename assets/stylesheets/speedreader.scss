@@ -1,32 +1,23 @@
-// Speedreader — base styles, scoped under .speedreader so it never
-// clashes with the rest of the theme.
-
 .speedreader {
-  /* Use Discourse theme variables where possible so the reader matches the forum theme.
-     Fallback to the previous palette when the variables are not defined. */
-  --sr-bg: var(--primary, #15110d);
-  --sr-bg-2: var(--secondary, #1c1610);
-  --sr-panel: var(--tertiary, #211a13);
-  --sr-panel-2: color-mix(in srgb, var(--tertiary, #2a2116) 10%, transparent);
-  --sr-parchment: var(--foreground, #ede1c3);
-  --sr-parchment-dim: color-mix(in srgb, var(--foreground, #c9bb98) 60%, black 40%);
-  --sr-ember: var(--accent, #d3541b);
-  --sr-ember-bright: color-mix(in srgb, var(--accent, #f0743a) 20%, var(--accent, #d3541b));
-  --sr-ember-deep: color-mix(in srgb, var(--accent, #7c2a0e) 10%, black 20%);
-  --sr-gold: var(--secondary, #b6903f);
-  --sr-gold-dim: color-mix(in srgb, var(--secondary, #8a6e35) 50%, black 30%);
-  --sr-muted: color-mix(in srgb, var(--foreground, #8d8170) 70%, black 30%);
-  --sr-line: color-mix(in srgb, var(--tertiary, #382c1f) 60%, black 20%);
-
-  /* font-size control for pivot word; can be adjusted by UI and keyboard */
-  --sr-font-size: 2.6rem;
-  --sr-font-family: var(--font-family, serif);
+  --sr-bg: #15110d;
+  --sr-bg-2: #1c1610;
+  --sr-panel: #211a13;
+  --sr-panel-2: #2a2116;
+  --sr-parchment: #ede1c3;
+  --sr-parchment-dim: #c9bb98;
+  --sr-ember: #d3541b;
+  --sr-ember-bright: #f0743a;
+  --sr-ember-deep: #7c2a0e;
+  --sr-gold: #b6903f;
+  --sr-gold-dim: #8a6e35;
+  --sr-muted: #8d8170;
+  --sr-line: #382c1f;
 
   margin: 0 auto;
   padding: 2em;
   background: var(--sr-bg);
   border-radius: 1em;
-  font-family: var(--sr-font-family);
+  font-family: var(--font-family);
   color: var(--sr-parchment);
 
   // ---------- Topbar (reader) ----------
@@ -143,7 +134,7 @@
   .sr-word-after {
     flex: 1 1 0;
     min-width: 0;
-    font-size: calc(var(--sr-font-size) * 0.95);
+    font-size: 2.6rem;
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
@@ -152,7 +143,7 @@
   .sr-word-after { text-align: left; }
   .sr-word-pivot {
     flex: 0 0 auto;
-    font-size: var(--sr-font-size);
+    font-size: 2.6rem;
     font-weight: 700;
     color: var(--sr-ember-bright);
     text-shadow: 0 0 22px rgba(211, 84, 27, 0.55);
@@ -259,30 +250,12 @@
     color: var(--sr-muted);
   }
 
-  .sr-size-controls {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.9rem;
-    color: var(--sr-parchment-dim);
-  }
-  .sr-size-controls button { min-width: 36px; }
-
   .sr-hint-row {
     margin-top: 14px;
     text-align: center;
     font-size: 0.78rem;
     color: var(--sr-muted);
     min-height: 1.2em;
-  }
-
-  /* persistent keyboard hints at the very bottom */
-  .sr-key-hints {
-    margin-top: 8px;
-    text-align: center;
-    font-size: 0.78rem;
-    color: var(--sr-parchment-dim);
-    opacity: 0.95;
   }
 
   @media (max-width: 520px) {
