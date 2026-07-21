@@ -6,6 +6,8 @@ import { service } from "@ember/service";
 import { htmlSafe } from "@ember/template";
 import { LinkTo } from "@ember/routing";
 import { ajax } from "discourse/lib/ajax";
+import didInsert from "@ember/render-modifiers/modifiers/did-insert";
+import willDestroy from "@ember/render-modifiers/modifiers/will-destroy";
 import { i18n } from "discourse-i18n";
 
 const SENTENCE_END_RE = /[.!?…]$/;
@@ -406,7 +408,7 @@ export default class SpeedreaderReader extends Component {
   }
 
   <template>
-    <div class="speedreader" {{did-insert this.setupElement}} {{will-destroy this.teardownElement}}>
+    <div class="speedreader" {{didInsert this.setupElement}} {{willDestroy this.teardownElement}}>
       <div class="sr-topbar">
         <LinkTo @route="speedreader-library" class="sr-back-link">
           {{i18n "speedreader.reader.back_to_library"}}
