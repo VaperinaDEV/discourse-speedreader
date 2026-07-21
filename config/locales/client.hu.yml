@@ -19,6 +19,8 @@ hu:
         loading: "Betöltés…"
         back_to_library: "Vissza a könyvtárhoz"
         play: "Lejátszás"
+        key_play: "Start/Stop"
+        key_font: "Betűméret"
         pause: "Szünet"
         back_words: "10 szó vissza"
         forward_words: "10 szó előre"
