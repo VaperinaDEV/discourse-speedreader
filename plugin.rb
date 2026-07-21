@@ -32,6 +32,6 @@ after_initialize do
   end
 
   Discourse::Application.routes.append do
-    mount ::DiscourseSpeedreader::Engine, at: "/speedreader"
+    mount ::DiscourseSpeedreader::Engine, at: "/speedreader-api"
   end
 end
