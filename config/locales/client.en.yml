@@ -6,7 +6,7 @@ en:
       library:
         title: "My books"
         edit_title_prompt: "Edit title"
-        upload_button: "Upload PDF"
+        upload_button: "Upload"
         uploading: "Uploading… %{percent}%"
         processing: "Processing page %{page} of %{total}…"
         empty: "You haven't uploaded any books yet — upload a PDF above to get started."
