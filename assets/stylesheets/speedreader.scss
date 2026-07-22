@@ -41,10 +41,16 @@
   .sr-book-title {
     flex: 1;
     text-align: center;
-    h1 {
-      font-size: 1.1rem;
-      margin: 0;
-      color: var(--sr-parchment);
+    .sr-editable-book {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25em;
+      h1 {
+        font-size: 1.1rem;
+        margin: 0;
+        color: var(--sr-parchment);
+      }
     }
   }
   .sr-book-author {
