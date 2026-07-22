@@ -287,15 +287,15 @@ export default class SpeedreaderReader extends Component {
   }
 
   @action
-  jumpBack() {
+  jumpWordBack() {
     this.pause();
-    this.seekToWordIndex(this.currentWordIndex - 10);
+    this.seekToWordIndex(this.currentWordIndex - 1);
   }
-
+  
   @action
-  jumpForward() {
+  jumpWordForward() {
     this.pause();
-    this.seekToWordIndex(this.currentWordIndex + 10);
+    this.seekToWordIndex(this.currentWordIndex + 1);
   }
 
   @action
@@ -306,7 +306,7 @@ export default class SpeedreaderReader extends Component {
     while (i > 0 && !SENTENCE_END_RE.test(this.words[i - 1])) i--;
     this.seekToWordIndex(i);
   }
-
+  
   @action
   jumpSentenceForward() {
     this.pause();
@@ -405,10 +405,10 @@ export default class SpeedreaderReader extends Component {
       this.togglePlay();
     } else if (event.code === "ArrowLeft") {
       event.preventDefault();
-      this.jumpBack();
+      this.jumpWordBack();
     } else if (event.code === "ArrowRight") {
       event.preventDefault();
-      this.jumpForward();
+      this.jumpWordForward();
     } else if (event.code === "ArrowUp") {
       event.preventDefault();
       this.wpm = Math.min(max, this.wpm + 25);
@@ -537,14 +537,14 @@ export default class SpeedreaderReader extends Component {
         <button
           type="button"
           class="sr-btn-round"
-          {{on "click" this.jumpBack}}
+          {{on "click" this.jumpSentenceBack}}
         >
-          {{dIcon "angles-left"}}10
+          {{dIcon "angles-left"}}
         </button>
         <button
           type="button"
           class="sr-btn-round"
-          {{on "click" this.jumpSentenceBack}}
+          {{on "click" this.jumpWordBack}}
         >
           {{dIcon "angle-left"}}
         </button>
@@ -562,16 +562,16 @@ export default class SpeedreaderReader extends Component {
         <button
           type="button"
           class="sr-btn-round"
-          {{on "click" this.jumpSentenceForward}}
+          {{on "click" this.jumpWordForward}}
         >
           {{dIcon "angle-right"}}
         </button>
         <button
           type="button"
           class="sr-btn-round"
-          {{on "click" this.jumpForward}}
+          {{on "click" this.jumpSentenceForward}}
         >
-          10{{dIcon "angles-right"}}
+          {{dIcon "angles-right"}}
         </button>
       </div>
 
@@ -617,7 +617,7 @@ export default class SpeedreaderReader extends Component {
       </div>
 
       <div class="sr-key-hints">
-        Space: {{i18n "speedreader.reader.key_play"}} · {{dIcon "arrow-left"}}/{{dIcon "arrow-right"}}: 10 · {{dIcon "arrow-up"}}/{{dIcon "arrow-down"}}: WPM · {{dIcon "plus"}}/{{dIcon "minus"}}: {{i18n "speedreader.reader.key_font"}}
+        Space: {{i18n "speedreader.reader.key_play"}} · {{dIcon "arrow-left"}}/{{dIcon "arrow-right"}}: 1 · {{dIcon "arrow-up"}}/{{dIcon "arrow-down"}}: WPM · {{dIcon "plus"}}/{{dIcon "minus"}}: {{i18n "speedreader.reader.key_font"}}
       </div>
     </div>
   </template>
