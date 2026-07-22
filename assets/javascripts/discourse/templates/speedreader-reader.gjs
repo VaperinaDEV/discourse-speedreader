@@ -31,6 +31,10 @@ export default class SpeedreaderReader extends Component {
   // track which page index is selected in the UI so the <select> follows playback
   @tracked selectedPageIndex = 0;
 
+  // editing title state
+  @tracked editingTitle = false;
+  @tracked editTitleValue = "";
+
   // reference to the root DOM element, set via did-insert
   element = null;
 
@@ -46,6 +50,9 @@ export default class SpeedreaderReader extends Component {
 
     // initialize selected page based on startWordIndex
     this.updateSelectedPage();
+
+    // initialize editTitleValue
+    this.editTitleValue = this.book.title || "";
 
     this._onKeyDown = this.onKeyDown.bind(this);
     this._onMouseMove = this.onFuseDrag.bind(this);
@@ -77,6 +84,41 @@ export default class SpeedreaderReader extends Component {
   @action
   teardownElement() {
     this.element = null;
+  }
+
+  @action
+  startEditTitle() {
+    this.editingTitle = true;
+    this.editTitleValue = this.book.title || "";
+    // focus handled by browser; optional autofocus could be added
+  }
+
+  @action
+  cancelEditTitle() {
+    this.editingTitle = false;
+  }
+
+  @action
+  async saveTitle() {
+    const title = String(this.editTitleValue || "").trim().slice(0, 200);
+    try {
+      const resp = await ajax(`/speedreader-api/books/${this.book.id}`, {
+        type: "PUT",
+        data: { title },
+      });
+      // resp.book contains updated summary
+      if (resp && resp.book) {
+        this.book.title = resp.book.title;
+      } else {
+        this.book.title = title;
+      }
+      this.editingTitle = false;
+    } catch (e) {
+      // fallback: keep editing open and show console error
+      // in production you'd show a user-facing error
+      console.error('Failed to save title', e);
+      alert(i18n('speedreader.errors.save_failed'));
+    }
   }
 
   get chunkWordsList() {
@@ -414,7 +456,14 @@ export default class SpeedreaderReader extends Component {
           {{i18n "speedreader.reader.back_to_library"}}
         </LinkTo>
         <div class="sr-book-title">
-          <h1>{{this.book.title}}</h1>
+          {{#if this.editingTitle}}
+            <input type="text" value={{this.editTitleValue}} {{on "input" (fn (mut this.editTitleValue) value="target.value")}} />
+            <button type="button" {{on "click" this.saveTitle}}>OK</button>
+            <button type="button" {{on "click" this.cancelEditTitle}}>✕</button>
+          {{else}}
+            <h1>{{this.book.title}}</h1>
+            <button type="button" class="btn btn-tertiary" {{on "click" this.startEditTitle}}>✎</button>
+          {{/if}}
           {{#if this.book.author}}<div class="sr-book-author">{{this.book.author}}</div>{{/if}}
         </div>
         <select value={{this.selectedPageIndex}} {{on "change" this.onPageSelect}}>
