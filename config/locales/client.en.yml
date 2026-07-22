@@ -18,7 +18,7 @@ en:
         pages_count: "%{count} pages"
       reader:
         loading: "Loading…"
-        back_to_library: "Back to library"
+        back_to_library: "Back"
         play: "Play"
         key_play: "Start/Stop"
         key_font: "Font size"
