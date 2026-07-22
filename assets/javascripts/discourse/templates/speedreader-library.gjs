@@ -7,6 +7,7 @@ import { service } from "@ember/service";
 import { LinkTo } from "@ember/routing";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
+import dIcon from "discourse/helpers/d-icon";
 import { i18n } from "discourse-i18n";
 import { extractFile } from "../lib/speedreader-file";
 
@@ -149,7 +150,7 @@ export default class SpeedreaderLibrary extends Component {
                   class="btn"
                   {{on "click" (fn this.editTitle book)}}
                 >
-                  ✎
+                  {{dIcon "pencil"}}
                 </button>
                 <button
                   type="button"

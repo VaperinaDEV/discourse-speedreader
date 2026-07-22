@@ -7,6 +7,7 @@ import { service } from "@ember/service";
 import { htmlSafe } from "@ember/template";
 import { LinkTo } from "@ember/routing";
 import { ajax } from "discourse/lib/ajax";
+import dIcon from "discourse/helpers/d-icon";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import willDestroy from "@ember/render-modifiers/modifiers/will-destroy";
 import { i18n } from "discourse-i18n";
@@ -92,6 +93,22 @@ export default class SpeedreaderReader extends Component {
     this.editingTitle = true;
     this.editTitleValue = this.book.title || "";
     // focus handled by browser; optional autofocus could be added
+  }
+
+  @action
+  onTitleInput(event) {
+    this.editTitleValue = event.target.value;
+  }
+  
+  @action
+  onTitleKeyDown(event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      this.saveTitle();
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      this.cancelEditTitle();
+    }
   }
 
   @action
@@ -458,14 +475,40 @@ export default class SpeedreaderReader extends Component {
         </LinkTo>
         <div class="sr-book-title">
           {{#if this.editingTitle}}
-            <input type="text" value={{this.editTitleValue}} {{on "input" (fn (mut this.editTitleValue) value="target.value")}} />
-            <button type="button" {{on "click" this.saveTitle}}>OK</button>
-            <button type="button" {{on "click" this.cancelEditTitle}}>✕</button>
+            <input
+              class="sr-title-input"
+              type="text"
+              value={{this.editTitleValue}}
+              {{on "input" this.onTitleInput}}
+              {{on "keydown" this.onTitleKeyDown}}
+            />
+            <button
+              type="button"
+              class="btn btn-primary"
+              {{on "click" this.saveTitle}}
+            >
+              {{dIcon "check"}}
+            </button>
+            <button
+              type="button"
+              class="btn btn-default"
+              {{on "click" this.cancelEditTitle}}
+            >
+              {{dIcon "xmark"}}
+            </button>
           {{else}}
             <h1>{{this.book.title}}</h1>
-            <button type="button" class="btn btn-tertiary" {{on "click" this.startEditTitle}}>✎</button>
+            <button
+              type="button"
+              class="btn btn-default"
+              {{on "click" this.startEditTitle}}
+            >
+              {{dIcon "pencil"}}
+            </button>
           {{/if}}
-          {{#if this.book.author}}<div class="sr-book-author">{{this.book.author}}</div>{{/if}}
+          {{#if this.book.author}}
+            <div class="sr-book-author">{{this.book.author}}</div>
+          {{/if}}
         </div>
         <select value={{this.selectedPageIndex}} {{on "change" this.onPageSelect}}>
           {{#each this.pages as |pm|}}
@@ -496,13 +539,45 @@ export default class SpeedreaderReader extends Component {
       </div>
 
       <div class="sr-controls">
-        <button type="button" class="sr-btn-round" {{on "click" this.jumpBack}}>«10</button>
-        <button type="button" class="sr-btn-round" {{on "click" this.jumpSentenceBack}}>‹</button>
-        <button type="button" class="sr-btn-play" {{on "click" this.togglePlay}}>
-          {{#if this.playing}}❚❚{{else}}▶{{/if}}
+        <button
+          type="button"
+          class="sr-btn-round"
+          {{on "click" this.jumpBack}}
+        >
+          {{dIcon "angles-left"}}10
         </button>
-        <button type="button" class="sr-btn-round" {{on "click" this.jumpSentenceForward}}>›</button>
-        <button type="button" class="sr-btn-round" {{on "click" this.jumpForward}}>10»</button>
+        <button
+          type="button"
+          class="sr-btn-round"
+          {{on "click" this.jumpSentenceBack}}
+        >
+          {{dIcon "angle-left"}}
+        </button>
+        <button
+          type="button"
+          class="sr-btn-play"
+          {{on "click" this.togglePlay}}
+        >
+          {{#if this.playing}}
+            {{dIcon "pause"}}
+          {{else}}
+            {{dIcon "play"}}
+          {{/if}}
+        </button>
+        <button
+          type="button"
+          class="sr-btn-round"
+          {{on "click" this.jumpSentenceForward}}
+        >
+          {{dIcon "angle-right"}}
+        </button>
+        <button
+          type="button"
+          class="sr-btn-round"
+          {{on "click" this.jumpForward}}
+        >
+          10{{dIcon "angles-right"}}
+        </button>
       </div>
 
       <div class="sr-panel-row">
@@ -524,9 +599,9 @@ export default class SpeedreaderReader extends Component {
           {{i18n "speedreader.reader.chunk_toggle"}}
         </label>
         <div class="sr-size-controls">
-          <button type="button" class="btn" {{on "click" this.decreaseFont}}>-</button>
-          <div class="sr-size-value">{{this.fontSize}} rem</div>
-          <button type="button" class="btn btn-primary" {{on "click" this.increaseFont}}>+</button>
+          <button type="button" class="btn" {{on "click" this.decreaseFont}}>{{dIcon "minus"}}</button>
+          <div class="sr-size-value">{{this.fontSize}}rem</div>
+          <button type="button" class="btn btn-primary" {{on "click" this.increaseFont}}>{{dIcon "plus"}}</button>
         </div>
       </div>
 
@@ -535,7 +610,7 @@ export default class SpeedreaderReader extends Component {
       </div>
 
       <div class="sr-key-hints">
-        Space: {{i18n "speedreader.reader.key_play"}} · ←/→: 10 · ↑/↓: WPM · +/-: {{i18n "speedreader.reader.key_font"}}
+        Space: {{i18n "speedreader.reader.key_play"}} · {{dIcon "arrow-left"}}/{{dIcon "arrow-right"}}: 10 · {{dIcon "arrow-up"}}/{{dIcon "arrow-down"}}: WPM · {{dIcon "plus"}}/{{dIcon "minus"}}: {{i18n "speedreader.reader.key_font"}}
       </div>
     </div>
   </template>
