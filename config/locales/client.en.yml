@@ -5,6 +5,7 @@ en:
       nav_label: "Speedreader"
       library:
         title: "My books"
+        edit_title_prompt: "Edit title"
         upload_button: "Upload PDF"
         uploading: "Uploading… %{percent}%"
         processing: "Processing page %{page} of %{total}…"
