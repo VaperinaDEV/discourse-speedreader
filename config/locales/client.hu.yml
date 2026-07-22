@@ -6,7 +6,7 @@ hu:
       library:
         title: "Könyveim"
         edit_title_prompt: "Cím módosítása"
-        upload_button: "PDF feltöltése"
+        upload_button: "Feltöltés"
         uploading: "Feltöltés… %{percent}%"
         processing: "Feldolgozás: %{page} / %{total}. oldal…"
         empty: "Még nincs feltöltött könyved — tölts fel egy PDF-et fent."
