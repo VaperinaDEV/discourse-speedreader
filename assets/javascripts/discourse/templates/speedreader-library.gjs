@@ -81,6 +81,26 @@ export default class SpeedreaderLibrary extends Component {
     }
   }
 
+  @action
+  async editTitle(book) {
+    const newTitle = window.prompt(i18n("speedreader.library.edit_title_prompt"), book.title || "");
+    if (!newTitle) return;
+    try {
+      const resp = await ajax(`/speedreader-api/books/${book.id}`, {
+        type: "PUT",
+        data: { title: newTitle.trim().slice(0, 200) },
+      });
+      // update local list
+      if (resp && resp.book) {
+        this.books = this.books.map((b) => (b.id === book.id ? { ...b, title: resp.book.title } : b));
+      } else {
+        this.books = this.books.map((b) => (b.id === book.id ? { ...b, title: newTitle } : b));
+      }
+    } catch (e) {
+      popupAjaxError(e);
+    }
+  }
+
   <template>
     <div class="speedreader">
       <div class="sr-upload-row">
@@ -124,6 +144,13 @@ export default class SpeedreaderLibrary extends Component {
                     {{i18n "speedreader.library.start_reading"}}
                   {{/if}}
                 </LinkTo>
+                <button
+                  type="button"
+                  class="btn"
+                  {{on "click" (fn this.editTitle book)}}
+                >
+                  ✎
+                </button>
                 <button
                   type="button"
                   class="btn btn-danger"
