@@ -4,6 +4,7 @@ import { action } from "@ember/object";
 import { on } from "@ember/modifier";
 import { service } from "@ember/service";
 import { htmlSafe } from "@ember/template";
+import { or } from "truth-helpers";
 import { LinkTo } from "@ember/routing";
 import { ajax } from "discourse/lib/ajax";
 import dIcon from "discourse/helpers/d-icon";
