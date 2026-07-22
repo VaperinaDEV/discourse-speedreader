@@ -9,6 +9,9 @@ enabled_site_setting :speedreader_enabled
 
 register_asset "stylesheets/speedreader.scss"
 
+register_asset "javascripts/vendor/mammoth.browser.min.js"
+register_asset "javascripts/vendor/epub.min.js"
+
 after_initialize do
   module ::DiscourseSpeedreader
     PLUGIN_NAME = "discourse-speedreader"
