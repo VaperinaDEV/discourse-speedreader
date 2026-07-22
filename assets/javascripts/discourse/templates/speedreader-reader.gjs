@@ -124,16 +124,13 @@ export default class SpeedreaderReader extends Component {
         type: "PUT",
         data: { title },
       });
-      // resp.book contains updated summary
-      if (resp && resp.book) {
-        this.book.title = resp.book.title;
-      } else {
-        this.book.title = title;
-      }
+      const newTitle = (resp && resp.book && resp.book.title) ? resp.book.title : title;
+  
+      // Replace the book object so Glimmer lássa a referenciaváltozást és újrarenderel
+      this.book = { ...this.book, title: newTitle };
+  
       this.editingTitle = false;
     } catch (e) {
-      // fallback: keep editing open and show console error
-      // in production you'd show a user-facing error
       console.error('Failed to save title', e);
       alert(i18n('speedreader.errors.save_failed'));
     }
@@ -484,27 +481,29 @@ export default class SpeedreaderReader extends Component {
             />
             <button
               type="button"
-              class="btn btn-primary"
+              class="btn btn-primary btn-icon no-text"
               {{on "click" this.saveTitle}}
             >
               {{dIcon "check"}}
             </button>
             <button
               type="button"
-              class="btn btn-default"
+              class="btn btn-default btn-icon no-text"
               {{on "click" this.cancelEditTitle}}
             >
               {{dIcon "xmark"}}
             </button>
           {{else}}
-            <h1>{{this.book.title}}</h1>
-            <button
-              type="button"
-              class="btn btn-default"
-              {{on "click" this.startEditTitle}}
-            >
-              {{dIcon "pencil"}}
-            </button>
+            <div class="sr-editable-title">
+              <h1>{{this.book.title}}</h1>
+              <button
+                type="button"
+                class="btn btn-transparent btn-small btn-icon no-text"
+                {{on "click" this.startEditTitle}}
+              >
+                {{dIcon "pencil"}}
+              </button>
+            </div>
           {{/if}}
           {{#if this.book.author}}
             <div class="sr-book-author">{{this.book.author}}</div>
@@ -599,9 +598,21 @@ export default class SpeedreaderReader extends Component {
           {{i18n "speedreader.reader.chunk_toggle"}}
         </label>
         <div class="sr-size-controls">
-          <button type="button" class="btn" {{on "click" this.decreaseFont}}>{{dIcon "minus"}}</button>
+          <button
+            type="button"
+            class="btn btn-icon no-text"
+            {{on "click" this.decreaseFont}}
+          >
+            {{dIcon "minus"}}
+          </button>
           <div class="sr-size-value">{{this.fontSize}}rem</div>
-          <button type="button" class="btn btn-primary" {{on "click" this.increaseFont}}>{{dIcon "plus"}}</button>
+          <button
+            type="button"
+            class="btn btn-primary btn-icon no-text"
+            {{on "click" this.increaseFont}}
+          >
+            {{dIcon "plus"}}
+          </button>
         </div>
       </div>
 
