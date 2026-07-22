@@ -206,6 +206,8 @@
     height: 6px;
     border-radius: 0.25em;
     background: var(--sr-panel-2);
+    touch-action: none;
+    user-select: none;
     cursor: pointer;
     transition: height 0.12s ease;
     &:hover { height: 9px; }
