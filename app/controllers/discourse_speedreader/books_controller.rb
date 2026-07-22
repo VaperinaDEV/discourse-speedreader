@@ -77,6 +77,27 @@ module DiscourseSpeedreader
       }
     end
 
+    def update
+      book = find_owned_book!
+      updated = false
+    
+      if params[:title]
+        book.title = params[:title].to_s.strip[0, 200]
+        updated = true
+      end
+    
+      if params[:author]
+        book.author = params[:author].to_s.strip[0, 200]
+        updated = true
+      end
+    
+      if updated
+        book.save!
+      end
+    
+      render json: { book: book_summary_json(book, SpeedreaderProgress.find_by(user_id: current_user.id, book_id: book.id)) }
+    end
+
     def destroy
       book = find_owned_book!
       book.destroy!
