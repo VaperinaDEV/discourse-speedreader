@@ -4,15 +4,26 @@
 import { tokenizeWords } from "./speedreader-tokenizer";
 import { extractPdf } from "./speedreader-pdf";
 
-async function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) return resolve();
-    const s = document.createElement("script");
-    s.src = src;
-    s.onload = resolve;
-    s.onerror = reject;
-    document.head.appendChild(s);
-  });
+async function loadScriptWithFallback(urls) {
+  for (const url of urls) {
+    try {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = url;
+        s.async = true;
+        s.onload = () => resolve(url);
+        s.onerror = () => {
+          s.remove();
+          reject(new Error(`load failed: ${url}`));
+        };
+        document.head.appendChild(s);
+      });
+      return url;
+    } catch (err) {
+      console.warn(err);
+    }
+  }
+  throw new Error('All script load attempts failed');
 }
 
 export async function extractFile(file, onProgress) {
@@ -35,54 +46,75 @@ export async function extractFile(file, onProgress) {
   }
 
   if (name.endsWith('.docx')) {
-    // load mammoth from CDN and extract raw text
-    const MAMMOTH = "https://unpkg.com/mammoth@1.4.19/dist/mammoth.browser.min.js";
     try {
-      await loadScript(MAMMOTH);
-      const arrayBuffer = await file.arrayBuffer();
-      // mammoth expects a ArrayBuffer or raw file
-      // mammoth.extractRawText is available on the loaded global if present
-      // If mammoth isn't available, throw and fallthrough to error
-      // eslint-disable-next-line no-undef
+      if (!window.mammoth || !window.mammoth.extractRawText) {
+        await loadScriptWithFallback([
+          'https://cdn.jsdelivr.net/npm/mammoth@1.11.0/mammoth.browser.min.js',
+          'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.11.0/mammoth.browser.min.js',
+          'https://cdn.jsdelivr.net/npm/mammoth/mammoth.browser.min.js'
+        ]);
+      }
+  
       if (window.mammoth && window.mammoth.extractRawText) {
+        const arrayBuffer = await file.arrayBuffer();
         const result = await window.mammoth.extractRawText({ arrayBuffer });
         const text = result.value || '';
         const words = tokenizeWords(text);
         return { words, pages: [{ page: 1, index: 0 }], numPages: 1, title: null, author: null };
+      } else {
+        throw new Error('mammoth-not-available');
       }
     } catch (e) {
+      console.error('DOCX extraction error', e);
       throw new Error('docx-extraction-failed');
     }
   }
 
   if (name.endsWith('.epub')) {
-    // load epub.js or similar; epub parsing in-browser can be complex — try epub.js
-    const EPUBJS = "https://cdnjs.cloudflare.com/ajax/libs/epub.js/0.3.88/epub.min.js";
     try {
-      await loadScript(EPUBJS);
-      // eslint-disable-next-line no-undef
+      if (!window.ePub) {
+        await loadScriptWithFallback([
+          'https://cdn.jsdelivr.net/npm/epubjs@0.3.88/dist/epub.min.js',
+          'https://unpkg.com/epubjs@0.3.88/dist/epub.min.js',
+          'https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js',
+          'https://unpkg.com/epubjs/dist/epub.min.js'
+        ]);
+      }
+  
       if (window.ePub) {
         const arrayBuffer = await file.arrayBuffer();
         const book = window.ePub(arrayBuffer);
-        const renderer = book.renderTo(document.createElement('div'));
-        // Simple approach: iterate sections and collect text — epub.js API is async
+        await book.ready;
         const textChunks = [];
-        const spine = await book.loaded.spine;
-        for (const item of spine.spine.items) {
+  
+        const spine = book.loaded && book.loaded.spine;
+        if (spine && spine.spine && Array.isArray(spine.spine.items)) {
+          for (const item of spine.spine.items) {
+            try {
+              const content = await item.load(book.load.bind(book));
+              const doc = new DOMParser().parseFromString(content, 'text/html');
+              textChunks.push(doc.body.textContent || '');
+              if (item.unload) item.unload();
+            } catch (e) {
+              // ignore section errors
+              console.warn('epub section error', e);
+            }
+          }
+        } else {
           try {
-            const content = await item.load(book.load.bind(book));
-            const doc = new DOMParser().parseFromString(content, 'text/html');
-            textChunks.push(doc.body.textContent || '');
-            item.unload();
+            const rendition = book.renderTo(document.createElement('div'));
           } catch (e) {
-            // ignore section errors
           }
         }
+  
         const combined = textChunks.join('\n');
         const words = tokenizeWords(combined);
         return { words, pages: [{ page: 1, index: 0 }], numPages: 1, title: null, author: null };
+      } else {
+        throw new Error('epub-lib-not-available');
       }
     } catch (e) {
+      console.error('EPUB extraction error', e);
       throw new Error('epub-extraction-failed');
     }
   }
