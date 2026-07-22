@@ -16,29 +16,24 @@ const SENTENCE_END_RE = /[.!?…]$/;
 export default class SpeedreaderReader extends Component {
   @service siteSettings;
 
-  words = this.args.model.words;
-  pages = this.args.model.pages;
+  words = this.args.model.words || [];
+  pages = this.args.model.pages || [];
 
   @tracked book = this.args.model.book;
   @tracked displayUnits = [];
   @tracked dIdx = 0;
   @tracked playing = false;
   @tracked wpm =
-    this.args.model.progress.wpm || this.siteSettings.speedreader_default_wpm || 300;
+    this.args.model.progress?.wpm || this.siteSettings?.speedreader_default_wpm || 300;
   @tracked chunkMode = false;
   @tracked justSaved = false;
-  @tracked fontSize = parseFloat(this.args.model.progress.font_size) || 2.6;
+  @tracked fontSize = parseFloat(this.args.model.progress?.font_size) || 2.6;
 
-  // track which page index is selected in the UI so the <select> follows playback
   @tracked selectedPageIndex = 0;
-
-  // editing title state
   @tracked editingTitle = false;
   @tracked editTitleValue = "";
 
-  // reference to the root DOM element, set via did-insert
   element = null;
-
   timer = null;
   saveTimer = null;
   dragging = false;
@@ -46,21 +41,14 @@ export default class SpeedreaderReader extends Component {
   constructor() {
     super(...arguments);
     this.buildDisplayUnits();
-    const startWordIndex = this.args.model.progress.word_index || 0;
+    const startWordIndex = this.args.model.progress?.word_index || 0;
     this.dIdx = this.displayIndexFor(startWordIndex);
 
-    // initialize selected page based on startWordIndex
     this.updateSelectedPage();
-
-    // initialize editTitleValue
-    this.editTitleValue = this.book.title || "";
+    this.editTitleValue = this.book?.title || "";
 
     this._onKeyDown = this.onKeyDown.bind(this);
-    this._onMouseMove = this.onFuseDrag.bind(this);
-    this._onMouseUp = this.onFuseDragEnd.bind(this);
     window.addEventListener("keydown", this._onKeyDown);
-    window.addEventListener("mousemove", this._onMouseMove);
-    window.addEventListener("mouseup", this._onMouseUp);
   }
 
   willDestroy() {
@@ -68,18 +56,15 @@ export default class SpeedreaderReader extends Component {
     clearTimeout(this.timer);
     clearTimeout(this.saveTimer);
     window.removeEventListener("keydown", this._onKeyDown);
-    window.removeEventListener("mousemove", this._onMouseMove);
-    window.removeEventListener("mouseup", this._onMouseUp);
     this.saveProgress(true);
   }
 
   @action
   setupElement(el) {
     this.element = el;
-    // ensure font size is within allowed bounds and apply it
     const applied = Math.min(4.0, Math.max(1.0, +this.fontSize));
     this.fontSize = applied;
-    el.style.setProperty('--sr-font-size', `${this.fontSize}rem`);
+    el.style.setProperty("--sr-font-size", `${this.fontSize}rem`);
   }
 
   @action
@@ -90,15 +75,14 @@ export default class SpeedreaderReader extends Component {
   @action
   startEditTitle() {
     this.editingTitle = true;
-    this.editTitleValue = this.book.title || "";
-    // focus handled by browser; optional autofocus could be added
+    this.editTitleValue = this.book?.title || "";
   }
 
   @action
   onTitleInput(event) {
     this.editTitleValue = event.target.value;
   }
-  
+
   @action
   onTitleKeyDown(event) {
     if (event.key === "Enter") {
@@ -123,17 +107,17 @@ export default class SpeedreaderReader extends Component {
         type: "PUT",
         data: { title },
       });
-      const newTitle = (resp && resp.book && resp.book.title) ? resp.book.title : title;
+      const newTitle = resp?.book?.title ? resp.book.title : title;
       this.book = { ...this.book, title: newTitle };
       this.editingTitle = false;
     } catch (e) {
-      console.error('Failed to save title', e);
-      alert(i18n('speedreader.errors.save_failed'));
+      console.error("Failed to save title", e);
+      alert(i18n("speedreader.errors.save_failed"));
     }
   }
 
   get chunkWordsList() {
-    const raw = this.siteSettings.speedreader_chunk_words;
+    const raw = this.siteSettings?.speedreader_chunk_words;
     if (Array.isArray(raw)) return raw;
     if (typeof raw === "string") return raw.split("|").filter(Boolean);
     return [];
@@ -158,12 +142,12 @@ export default class SpeedreaderReader extends Component {
       }
     }
     this.displayUnits = out;
-    // after rebuilding units, ensure the selected page still follows the current index
     this.updateSelectedPage();
   }
 
   displayIndexFor(wordIdx) {
     const units = this.displayUnits;
+    if (!units.length) return 0;
     let lo = 0;
     let hi = units.length - 1;
     while (lo < hi) {
@@ -191,7 +175,7 @@ export default class SpeedreaderReader extends Component {
     else if (len <= 7) p = 2;
     else if (len <= 11) p = 3;
     else p = 4;
-    p = Math.min(p, len - 1);
+    p = Math.min(p, Math.max(0, len - 1));
     return {
       before: word.slice(0, p),
       pivot: word.slice(p, p + 1),
@@ -223,21 +207,15 @@ export default class SpeedreaderReader extends Component {
   }
 
   get timeRemainingText() {
-    const remaining = Math.max(
-      0,
-      this.totalWords - this.currentWordIndex - 1
-    );
-  
-    const secs = Math.ceil((remaining * 60) / this.wpm);
-  
+    const remaining = Math.max(0, this.totalWords - this.currentWordIndex - 1);
+    const secs = Math.ceil((remaining * 60) / (this.wpm || 300));
     const hh = Math.floor(secs / 3600);
     const mm = Math.floor((secs % 3600) / 60);
     const ss = secs % 60;
-  
+
     if (hh > 0) {
       return `${hh}:${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
     }
-  
     return `${mm}:${String(ss).padStart(2, "0")}`;
   }
 
@@ -249,7 +227,7 @@ export default class SpeedreaderReader extends Component {
     const last = text[len - 1];
     if (".!?…".includes(last)) mult *= 2.3;
     else if (",;:—-".includes(last)) mult *= 1.55;
-    if (text === text.toUpperCase() && /[A-ZÁÉÍÓÖŐÚÜŰ]/.test(text) && len > 1) mult *= 1.3;
+    if (text === text.toUpperCase() && /\p{Lu}/u.test(text) && len > 1) mult *= 1.3;
     return base * mult;
   }
 
@@ -264,7 +242,6 @@ export default class SpeedreaderReader extends Component {
     const unit = this.displayUnits[this.dIdx];
     this.timer = setTimeout(() => {
       this.dIdx = this.dIdx + 1;
-      // update selected page whenever we advance
       this.updateSelectedPage();
       this.scheduleNext();
     }, this.delayForUnit(unit.text));
@@ -292,7 +269,6 @@ export default class SpeedreaderReader extends Component {
   seekToWordIndex(newIdx) {
     const clamped = Math.max(0, Math.min(this.totalWords - 1, newIdx));
     this.dIdx = this.displayIndexFor(clamped);
-    // ensure the select follows the new index
     this.updateSelectedPage();
     if (this.playing) this.scheduleNext();
   }
@@ -302,7 +278,7 @@ export default class SpeedreaderReader extends Component {
     this.pause();
     this.seekToWordIndex(this.currentWordIndex - 1);
   }
-  
+
   @action
   jumpWordForward() {
     this.pause();
@@ -312,12 +288,11 @@ export default class SpeedreaderReader extends Component {
   @action
   jumpSentenceBack() {
     this.pause();
-    let i = this.currentWordIndex;
-    i = Math.max(0, i - 1);
+    let i = Math.max(0, this.currentWordIndex - 1);
     while (i > 0 && !SENTENCE_END_RE.test(this.words[i - 1])) i--;
     this.seekToWordIndex(i);
   }
-  
+
   @action
   jumpSentenceForward() {
     this.pause();
@@ -329,8 +304,8 @@ export default class SpeedreaderReader extends Component {
 
   @action
   onWpmInput(event) {
-    const min = this.siteSettings.speedreader_min_wpm || 100;
-    const max = this.siteSettings.speedreader_max_wpm || 900;
+    const min = this.siteSettings?.speedreader_min_wpm || 100;
+    const max = this.siteSettings?.speedreader_max_wpm || 900;
     this.wpm = Math.max(min, Math.min(max, parseInt(event.target.value, 10)));
     this.saveProgress();
   }
@@ -342,37 +317,39 @@ export default class SpeedreaderReader extends Component {
     this.chunkMode = event.target.checked;
     this.buildDisplayUnits();
     this.dIdx = this.displayIndexFor(wordIdx);
-    // ensure page select updates after chunk mode change
     this.updateSelectedPage();
   }
 
   @action
   onPageSelect(event) {
-    // event.target.value is a page index (word index to jump to)
     const idx = parseInt(event.target.value, 10);
     this.pause();
     this.seekToWordIndex(idx);
   }
 
   @action
-  onFuseMouseDown(event) {
+  onFusePointerDown(event) {
     this.dragging = true;
+    event.target.setPointerCapture(event.pointerId);
     this.seekFromClientX(event.clientX);
   }
 
-  onFuseDrag(event) {
-    if (this.dragging) this.seekFromClientX(event.clientX);
+  @action
+  onFusePointerMove(event) {
+    if (!this.dragging) return;
+    this.seekFromClientX(event.clientX);
   }
 
-  onFuseDragEnd() {
-    if (this.dragging) {
-      this.dragging = false;
-      this.saveProgress(true);
-    }
+  @action
+  onFusePointerUp(event) {
+    if (!this.dragging) return;
+    this.dragging = false;
+    event.target.releasePointerCapture(event.pointerId);
+    this.saveProgress(true);
   }
 
   seekFromClientX(clientX) {
-    const track = document.querySelector(".speedreader .sr-fuse-track");
+    const track = this.element?.querySelector(".sr-fuse-track");
     if (!track) return;
     const rect = track.getBoundingClientRect();
     const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
@@ -381,17 +358,13 @@ export default class SpeedreaderReader extends Component {
   }
 
   increaseFontStep(step = 0.2) {
-    const min = 1.0;
-    const max = 4.0;
-    this.fontSize = Math.min(max, +(this.fontSize + step).toFixed(2));
-    if (this.element) this.element.style.setProperty('--sr-font-size', `${this.fontSize}rem`);
+    this.fontSize = Math.min(4.0, +(this.fontSize + step).toFixed(2));
+    if (this.element) this.element.style.setProperty("--sr-font-size", `${this.fontSize}rem`);
   }
 
   decreaseFontStep(step = 0.2) {
-    const min = 1.0;
-    const max = 4.0;
-    this.fontSize = Math.max(min, +(this.fontSize - step).toFixed(2));
-    if (this.element) this.element.style.setProperty('--sr-font-size', `${this.fontSize}rem`);
+    this.fontSize = Math.max(1.0, +(this.fontSize - step).toFixed(2));
+    if (this.element) this.element.style.setProperty("--sr-font-size", `${this.fontSize}rem`);
   }
 
   @action
@@ -407,9 +380,9 @@ export default class SpeedreaderReader extends Component {
   }
 
   onKeyDown(event) {
-    if (event.target.tagName === "SELECT" || event.target.tagName === "INPUT") return;
-    const min = this.siteSettings.speedreader_min_wpm || 100;
-    const max = this.siteSettings.speedreader_max_wpm || 900;
+    if (["SELECT", "INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
+    const min = this.siteSettings?.speedreader_min_wpm || 100;
+    const max = this.siteSettings?.speedreader_max_wpm || 900;
 
     if (event.code === "Space") {
       event.preventDefault();
@@ -459,7 +432,6 @@ export default class SpeedreaderReader extends Component {
       this.selectedPageIndex = 0;
       return;
     }
-    // find the last page entry whose index <= currentWordIndex
     let found = null;
     for (let i = this.pages.length - 1; i >= 0; i--) {
       if (this.pages[i].index <= this.currentWordIndex) {
@@ -538,7 +510,12 @@ export default class SpeedreaderReader extends Component {
       </div>
 
       <div class="sr-fuse-wrap">
-        <div class="sr-fuse-track" {{on "mousedown" this.onFuseMouseDown}}>
+        <div 
+          class="sr-fuse-track" 
+          {{on "pointerdown" this.onFusePointerDown}}
+          {{on "pointermove" this.onFusePointerMove}}
+          {{on "pointerup" this.onFusePointerUp}}
+        >
           <div class="sr-fuse-fill" style={{this.fuseFillStyle}}></div>
           <div class="sr-fuse-spark" style={{this.fuseSparkStyle}}></div>
         </div>
@@ -561,7 +538,7 @@ export default class SpeedreaderReader extends Component {
         </button>
         <button
           type="button"
-          class="sr-btn-play {{if this.playing "is-playing"}}"
+          class="sr-btn-play {{if this.playing 'is-playing'}}"
           {{on "click" this.togglePlay}}
         >
           {{#if this.playing}}
@@ -591,8 +568,8 @@ export default class SpeedreaderReader extends Component {
           <label>{{i18n "speedreader.reader.speed_label"}}</label>
           <input
             type="range"
-            min={{this.siteSettings.speedreader_min_wpm}}
-            max={{this.siteSettings.speedreader_max_wpm}}
+            min={{or this.siteSettings.speedreader_min_wpm 100}}
+            max={{or this.siteSettings.speedreader_max_wpm 900}}
             step="10"
             value={{this.wpm}}
             {{on "input" this.onWpmInput}}
