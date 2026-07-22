@@ -223,11 +223,22 @@ export default class SpeedreaderReader extends Component {
   }
 
   get timeRemainingText() {
-    const remaining = this.totalWords - this.currentWordIndex - 1;
-    const secs = Math.max(0, Math.round((remaining * 60) / this.wpm));
-    const mm = Math.floor(secs / 60);
-    const ss = String(secs % 60).padStart(2, "0");
-    return i18n("speedreader.reader.time_remaining", { time: `${mm}:${ss}` });
+    const remaining = Math.max(
+      0,
+      this.totalWords - this.currentWordIndex - 1
+    );
+  
+    const secs = Math.ceil((remaining * 60) / this.wpm);
+  
+    const hh = Math.floor(secs / 3600);
+    const mm = Math.floor((secs % 3600) / 60);
+    const ss = secs % 60;
+  
+    if (hh > 0) {
+      return `${hh}:${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
+    }
+  
+    return `${mm}:${String(ss).padStart(2, "0")}`;
   }
 
   delayForUnit(text) {
@@ -522,7 +533,7 @@ export default class SpeedreaderReader extends Component {
         <div class="sr-guide sr-guide-bottom"></div>
         <div class="sr-meta-row">
           <span>{{this.wordsProgressText}}</span>
-          <span>{{this.timeRemainingText}}</span>
+          <span>{{dIcon "clock"}} {{this.timeRemainingText}}</span>
         </div>
       </div>
 
