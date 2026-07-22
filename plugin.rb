@@ -34,6 +34,7 @@ after_initialize do
     post "/books" => "books#create"
     get "/books/:id" => "books#show"
     delete "/books/:id" => "books#destroy"
+    put "/books/:id" => "books#update"
     put "/books/:id/progress" => "books#update_progress"
   end
 
