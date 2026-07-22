@@ -147,7 +147,7 @@ export default class SpeedreaderLibrary extends Component {
                 </LinkTo>
                 <button
                   type="button"
-                  class="btn"
+                  class="btn btn-icon no-text"
                   {{on "click" (fn this.editTitle book)}}
                 >
                   {{dIcon "pencil"}}
