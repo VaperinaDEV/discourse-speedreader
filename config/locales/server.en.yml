@@ -1,14 +1,14 @@
 en:
   site_settings:
-    speedreader_enabled: "Enable the Speedreader plugin (word-by-word PDF speed reading)"
+    speedreader_enabled: "Enable the Speedreader plugin (word-by-word speed reading for PDF, EPUB, DOCX, TXT, and Markdown documents)"
     speedreader_default_wpm: "Default reading speed (words per minute) for users without a saved preference"
     speedreader_min_wpm: "Minimum speed selectable on the reader's speed slider"
     speedreader_max_wpm: "Maximum speed selectable on the reader's speed slider"
     speedreader_max_words_per_book: "Maximum number of words allowed per uploaded document"
-    speedreader_max_upload_size_mb: "Maximum PDF upload size, in megabytes"
+    speedreader_max_upload_size_mb: "Maximum document upload size, in megabytes"
     speedreader_chunk_words: "Short function words that may be grouped with the next word when 'combine short words' is enabled"
   speedreader:
     errors:
-      no_text_extracted: "Couldn't extract text from this PDF — it's likely a scanned (image-only) document."
+      no_text_extracted: "Couldn't extract any text from this document. If it's a scanned/image-only PDF, this plugin can't OCR it."
       too_many_words: "This document has more than %{max} words, which exceeds the configured limit."
       file_too_large: "The file exceeds the maximum upload size of %{mb} MB."

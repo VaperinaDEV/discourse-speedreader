@@ -41,11 +41,19 @@ export default class SpeedreaderLibrary extends Component {
     this.uploading = true;
     this.uploadStatusText = i18n("speedreader.library.uploading", { percent: 0 });
 
+    let extracted;
     try {
-      const extracted = await extractFile(file, (ratio, page, total) => {
+      extracted = await extractFile(file, (ratio, page, total) => {
         this.uploadStatusText = i18n("speedreader.library.processing", { page, total });
       });
+    } catch (e) {
+      console.error("Speedreader extraction error", e);
+      this.errorMessage = this.extractionErrorMessage(e);
+      this.uploading = false;
+      return;
+    }
 
+    try {
       const formData = new FormData();
       // send as 'file' so controller can handle arbitrary formats
       formData.append("file", file);
@@ -69,6 +77,18 @@ export default class SpeedreaderLibrary extends Component {
     } finally {
       this.uploading = false;
     }
+  }
+
+  extractionErrorMessage(e) {
+    const msg = e && e.message;
+    if (msg === "unsupported-format") return i18n("speedreader.errors.unsupported_format");
+    if (msg === "not-a-docx-file") return i18n("speedreader.errors.invalid_docx");
+    if (msg === "not-an-epub-file" || msg === "epub-missing-opf") {
+      return i18n("speedreader.errors.invalid_epub");
+    }
+    if (msg === "jszip-load-failed") return i18n("speedreader.errors.jszip_load_failed");
+    if (msg === "no-text-found") return i18n("speedreader.errors.no_text_extracted_client");
+    return i18n("speedreader.errors.no_text_extracted_client");
   }
 
   @action
@@ -111,7 +131,7 @@ export default class SpeedreaderLibrary extends Component {
         <input
           type="file"
           id="speedreader-pdf-input"
-          accept="application/pdf,.pdf,.txt,.md,.docx,.epub"
+          accept="application/pdf,.pdf,.epub,.docx,.txt,.md,.markdown"
           hidden
           {{on "change" this.onFileSelected}}
         />

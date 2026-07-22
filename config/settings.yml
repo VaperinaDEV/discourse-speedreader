@@ -32,7 +32,8 @@ plugins:
     min: 1000
     max: 3000000
 
-  # Feltölthető PDF maximális mérete megabájtban.
+  # Feltölthető dokumentum (PDF, EPUB, DOCX, TXT, MD) maximális mérete
+  # megabájtban.
   speedreader_max_upload_size_mb:
     client: true
     default: 80

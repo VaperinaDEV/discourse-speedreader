@@ -550,7 +550,7 @@ export default class SpeedreaderReader extends Component {
         </button>
         <button
           type="button"
-          class="sr-btn-play"
+          class="sr-btn-play {{if this.playing "is-playing"}}"
           {{on "click" this.togglePlay}}
         >
           {{#if this.playing}}

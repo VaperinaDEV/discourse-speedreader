@@ -1,5 +1,5 @@
 # name: discourse-speedreader
-# about: Word-by-word (RSVP) PDF speed reader — upload a PDF, read it one word at a time, resume where you left off.
+# about: Word-by-word (RSVP) speed reader for PDF, EPUB, DOCX, TXT, and Markdown — upload a document, read it one word at a time, resume where you left off.
 # version: 0.1.0
 # authors: Donát (Vaperina)
 # url: https://github.com/VaperinaDEV/discourse-speedreader
