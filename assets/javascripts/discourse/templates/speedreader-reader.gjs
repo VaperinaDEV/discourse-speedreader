@@ -1,7 +1,6 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
-import { fn } from "@ember/helper";
 import { on } from "@ember/modifier";
 import { service } from "@ember/service";
 import { htmlSafe } from "@ember/template";
@@ -19,8 +18,8 @@ export default class SpeedreaderReader extends Component {
 
   words = this.args.model.words;
   pages = this.args.model.pages;
-  book = this.args.model.book;
 
+  @tracked book = this.args.model.book;
   @tracked displayUnits = [];
   @tracked dIdx = 0;
   @tracked playing = false;
@@ -125,10 +124,7 @@ export default class SpeedreaderReader extends Component {
         data: { title },
       });
       const newTitle = (resp && resp.book && resp.book.title) ? resp.book.title : title;
-  
-      // Replace the book object so Glimmer lássa a referenciaváltozást és újrarenderel
       this.book = { ...this.book, title: newTitle };
-  
       this.editingTitle = false;
     } catch (e) {
       console.error('Failed to save title', e);
