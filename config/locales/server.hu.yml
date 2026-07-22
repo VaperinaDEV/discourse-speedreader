@@ -9,6 +9,6 @@ hu:
     speedreader_chunk_words: "Rövid kötőszók / névelők, amik a 'rövid szavak összevonása' bekapcsolásakor a következő szóval együtt jelenhetnek meg"
   speedreader:
     errors:
-      no_text_extracted: "Nem sikerült szöveget kinyerni ebből a dokumentumból. Ha szkennelt (kép alapú) PDF, azt ez a plugin nem tudja OCR-ezni."
+      no_text_extracted: "Nem sikerült szöveget kinyerni ebből a dokumentumból. Ha szkennelt (kép alapú), azt ez a plugin nem tudja OCR-ezni."
       too_many_words: "Ez a dokumentum több mint %{max} szót tartalmaz, ami meghaladja a beállított korlátot."
       file_too_large: "A fájl meghaladja a maximálisan engedélyezett %{mb} MB méretet."
