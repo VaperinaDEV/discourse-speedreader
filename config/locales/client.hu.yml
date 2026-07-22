@@ -5,6 +5,7 @@ hu:
       nav_label: "Gyorsolvasó"
       library:
         title: "Könyveim"
+        edit_title_prompt: "Cím módosítása"
         upload_button: "PDF feltöltése"
         uploading: "Feltöltés… %{percent}%"
         processing: "Feldolgozás: %{page} / %{total}. oldal…"
