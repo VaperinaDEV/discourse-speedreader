@@ -9,6 +9,6 @@ en:
     speedreader_chunk_words: "Short function words that may be grouped with the next word when 'combine short words' is enabled"
   speedreader:
     errors:
-      no_text_extracted: "Couldn't extract any text from this document. If it's a scanned/image-only PDF, this plugin can't OCR it."
+      no_text_extracted: "Couldn't extract any text from this document. If it's a scanned/image-only, we can't OCR it."
       too_many_words: "This document has more than %{max} words, which exceeds the configured limit."
       file_too_large: "The file exceeds the maximum upload size of %{mb} MB."

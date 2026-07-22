@@ -464,7 +464,7 @@ export default class SpeedreaderReader extends Component {
     <div class="speedreader" {{didInsert this.setupElement}} {{willDestroy this.teardownElement}}>
       <div class="sr-topbar">
         <LinkTo @route="speedreader-library" class="sr-back-link">
-          {{i18n "speedreader.reader.back_to_library"}}
+          {{dIcon "angle-left"}} {{i18n "speedreader.reader.back_to_library"}}
         </LinkTo>
         <div class="sr-book-title">
           {{#if this.editingTitle}}
@@ -604,7 +604,7 @@ export default class SpeedreaderReader extends Component {
           <div class="sr-size-value">{{this.fontSize}}rem</div>
           <button
             type="button"
-            class="btn btn-primary btn-icon no-text"
+            class="btn btn-icon no-text"
             {{on "click" this.increaseFont}}
           >
             {{dIcon "plus"}}

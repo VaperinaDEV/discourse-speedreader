@@ -18,7 +18,7 @@ hu:
         pages_count: "%{count} oldal"
       reader:
         loading: "Betöltés…"
-        back_to_library: "Vissza a könyvtárhoz"
+        back_to_library: "Vissza"
         play: "Lejátszás"
         key_play: "Start/Stop"
         key_font: "Betűméret"
