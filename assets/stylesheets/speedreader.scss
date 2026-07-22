@@ -150,19 +150,15 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   }
   .sr-guide {
-    position: absolute;
-    left: 50%;
     width: 1px;
     height: 1em;
     background: var(--sr-line-strong);
     opacity: 0.8;
+    margin: auto;
   }
-  .sr-guide-top { top: 1em; transform: translateX(-50%); }
-  .sr-guide-bottom { bottom: 1em; transform: translateX(-50%); }
-
   .sr-word-row {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: center;
     height: calc(var(--sr-font-size) * 2);
   }
