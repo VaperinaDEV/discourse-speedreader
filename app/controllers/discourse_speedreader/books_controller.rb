@@ -77,6 +77,12 @@ module DiscourseSpeedreader
       }
     end
 
+    def destroy
+      book = find_owned_book!
+      book.destroy!
+      render json: success_json
+    end
+
     def update
       book = find_owned_book!
       updated = false
@@ -96,12 +102,6 @@ module DiscourseSpeedreader
       end
     
       render json: { book: book_summary_json(book, SpeedreaderProgress.find_by(user_id: current_user.id, book_id: book.id)) }
-    end
-
-    def destroy
-      book = find_owned_book!
-      book.destroy!
-      render json: success_json
     end
 
     def update_progress
