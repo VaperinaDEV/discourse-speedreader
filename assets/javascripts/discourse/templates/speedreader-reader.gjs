@@ -50,7 +50,10 @@ export default class SpeedreaderReader extends Component {
     this.editTitleValue = this.book?.title || "";
 
     this._onKeyDown = this.onKeyDown.bind(this);
+    this._onResize = this.onResize.bind(this);
+
     window.addEventListener("keydown", this._onKeyDown);
+    window.addEventListener("resize", this._onResize);
   }
 
   willDestroy() {
@@ -58,7 +61,12 @@ export default class SpeedreaderReader extends Component {
     clearTimeout(this.timer);
     clearTimeout(this.saveTimer);
     window.removeEventListener("keydown", this._onKeyDown);
+    window.removeEventListener("resize", this._onResize);
     this.saveProgress(true);
+  }
+
+  onResize() {
+    this.viewportWidth = window.innerWidth;
   }
 
   @action
@@ -197,35 +205,27 @@ export default class SpeedreaderReader extends Component {
     };
   }
 
-  // Long words can overflow their
-  // half of the word box at larger font sizes / narrower screens. This
-  // estimates how many characters actually fit in the available half-width
-  // at the current font size and viewport, and shrinks just that word's
-  // font size enough to fit — short/medium words stay at full size.
   get wordFontSizeStyle() {
     const len = this.currentUnit.text.length;
     if (len === 0) return htmlSafe("");
-
-    // Horizontal chrome to subtract: .speedreader's own padding (1em each
-    // side) + .sr-stage's padding (20px each side) — both wrap the word
-    // row, so both eat into the space actually available to it.
-    const OUTER_PADDING_PX = 32; // .speedreader: padding 1em each side (~16px)
-    const STAGE_PADDING_PX = 40; // .sr-stage: padding 20px each side
+  
+    const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    const outerPaddingPx = rootFontSize * 2;   
+    const stagePaddingPx = rootFontSize * 2.5; 
+  
     const stageWidth =
-      Math.min(this.viewportWidth, 760) - OUTER_PADDING_PX - STAGE_PADDING_PX;
-    const halfWidth = stageWidth * 0.4; // leaves room for the pivot letter + guide margins
-    const REM_PX = 16;
-    const AVG_CHAR_WIDTH_EM = 0.62; // bold/semibold serif glyphs run wider than regular weight
-    const charPx = this.fontSize * REM_PX * AVG_CHAR_WIDTH_EM;
+      Math.min(this.viewportWidth, 760) - outerPaddingPx - stagePaddingPx;
+    const halfWidth = stageWidth * 0.4;
+  
+    const AVG_CHAR_WIDTH_EM = 0.62;
+    const charPx = this.fontSize * rootFontSize * AVG_CHAR_WIDTH_EM;
     const maxChars = Math.max(3, Math.floor(halfWidth / charPx));
-
-    // Worst case the pivot lands near one end, putting almost the whole
-    // word on a single side — sizing against the full word length keeps
-    // that case safe too.
+  
     let scale = 1;
     if (len > maxChars) {
       scale = Math.max(0.35, maxChars / len);
     }
+  
     return htmlSafe(`font-size: calc(var(--sr-font-size) * ${scale})`);
   }
 
@@ -566,7 +566,7 @@ export default class SpeedreaderReader extends Component {
         <div class="sr-guide sr-guide-bottom"></div>
         <div class="sr-meta-row">
           <span>{{this.wordsProgressText}}</span>
-          <span>{{this.timeRemainingText}}</span>
+          <span>{{dIcon "clock"}} {{this.timeRemainingText}}</span>
         </div>
       </div>
 
