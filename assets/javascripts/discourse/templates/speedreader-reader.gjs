@@ -185,9 +185,6 @@ export default class SpeedreaderReader extends Component {
   get pivotSplit() {
     const word = this.currentUnit.text;
     const prefixLen = this.currentUnit.prefixLen || 0;
-    // The ORP (pivot letter) is always computed on the real content word,
-    // never on a chunked-in short filler word (or the space joining them)
-    // — otherwise the highlight can land on "a" or on the gap itself.
     const contentWord = word.slice(prefixLen);
     const len = contentWord.length;
     let p;
@@ -209,21 +206,28 @@ export default class SpeedreaderReader extends Component {
     const len = this.currentUnit.text.length;
     if (len === 0) return htmlSafe("");
   
-    const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-    const outerPaddingPx = rootFontSize * 2;   
-    const stagePaddingPx = rootFontSize * 2.5; 
+    const rootFontSize =
+      parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  
+    const isMobile = this.viewportWidth < 520;
+    const outerPaddingEm = isMobile ? 1.5 : 2.0;
+    const outerPaddingPx = rootFontSize * outerPaddingEm;  
+    const stagePaddingPx = rootFontSize * 2.5;
   
     const stageWidth =
       Math.min(this.viewportWidth, 760) - outerPaddingPx - stagePaddingPx;
-    const halfWidth = stageWidth * 0.4;
   
-    const AVG_CHAR_WIDTH_EM = 0.62;
-    const charPx = this.fontSize * rootFontSize * AVG_CHAR_WIDTH_EM;
-    const maxChars = Math.max(3, Math.floor(halfWidth / charPx));
+    const halfWidth = stageWidth / 2;  
+    const { before, pivot, after } = this.pivotSplit;
+    const maxHalfLen = Math.max(before.length, after.length) + pivot.length;
+  
+    const AVG_CHAR_WIDTH_EM = 0.55;  
+    const targetHalfPx =
+      maxHalfLen * (this.fontSize * rootFontSize * AVG_CHAR_WIDTH_EM);
   
     let scale = 1;
-    if (len > maxChars) {
-      scale = Math.max(0.35, maxChars / len);
+    if (targetHalfPx > halfWidth) {
+      scale = Math.max(0.35, halfWidth / targetHalfPx);
     }
   
     return htmlSafe(`font-size: calc(var(--sr-font-size) * ${scale})`);
