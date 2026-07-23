@@ -29,6 +29,7 @@ export default class SpeedreaderReader extends Component {
   @tracked chunkMode = false;
   @tracked justSaved = false;
   @tracked fontSize = parseFloat(this.args.model.progress?.font_size) || 2.6;
+  @tracked viewportWidth = window.innerWidth;
 
   @tracked selectedPageIndex = 0;
   @tracked editingTitle = false;
@@ -196,16 +197,28 @@ export default class SpeedreaderReader extends Component {
     };
   }
 
-  // Long words (compound Hungarian words especially) can overflow their
-  // half of the word box at larger font sizes / narrower screens. Scale
-  // the font size down per-word once it passes a length threshold, so the
-  // whole word always stays visible instead of being clipped.
+  // Long words can overflow their
+  // half of the word box at larger font sizes / narrower screens. This
+  // estimates how many characters actually fit in the available half-width
+  // at the current font size and viewport, and shrinks just that word's
+  // font size enough to fit — short/medium words stay at full size.
   get wordFontSizeStyle() {
     const len = this.currentUnit.text.length;
-    const threshold = 13;
+    if (len === 0) return htmlSafe("");
+
+    const stageWidth = Math.min(this.viewportWidth, 760) - 40; // matches .speedreader max-width/padding
+    const halfWidth = stageWidth * 0.42; // leaves room for the pivot letter + guide margins
+    const REM_PX = 16;
+    const AVG_CHAR_WIDTH_EM = 0.55; // rough average glyph width for the reader's serif font
+    const charPx = this.fontSize * REM_PX * AVG_CHAR_WIDTH_EM;
+    const maxChars = Math.max(3, Math.floor(halfWidth / charPx));
+
+    // Worst case the pivot lands near one end, putting almost the whole
+    // word on a single side — sizing against the full word length keeps
+    // that case safe too.
     let scale = 1;
-    if (len > threshold) {
-      scale = Math.max(0.4, threshold / len);
+    if (len > maxChars) {
+      scale = Math.max(0.35, maxChars / len);
     }
     return htmlSafe(`font-size: calc(var(--sr-font-size) * ${scale})`);
   }
