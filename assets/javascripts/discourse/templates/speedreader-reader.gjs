@@ -210,18 +210,18 @@ export default class SpeedreaderReader extends Component {
       parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
   
     const isMobile = this.viewportWidth < 520;
-    const outerPaddingEm = isMobile ? 1.5 : 2.0;
-    const outerPaddingPx = rootFontSize * outerPaddingEm;  
-    const stagePaddingPx = rootFontSize * 2.5;
+    const totalPaddingEm = isMobile ? 4.0 : 4.5;
   
-    const stageWidth =
-      Math.min(this.viewportWidth, 760) - outerPaddingPx - stagePaddingPx;
-  
+    const totalPaddingPx = rootFontSize * totalPaddingEm;
+    const stageWidth = Math.min(this.viewportWidth, 760) - totalPaddingPx;    
     const halfWidth = stageWidth / 2;  
+    
     const { before, pivot, after } = this.pivotSplit;
+
     const maxHalfLen = Math.max(before.length, after.length) + pivot.length;
   
-    const AVG_CHAR_WIDTH_EM = 0.55;  
+    const AVG_CHAR_WIDTH_EM = 0.54;
+  
     const targetHalfPx =
       maxHalfLen * (this.fontSize * rootFontSize * AVG_CHAR_WIDTH_EM);
   
