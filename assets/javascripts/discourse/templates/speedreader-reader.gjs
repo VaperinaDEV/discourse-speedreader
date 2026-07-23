@@ -127,7 +127,7 @@ export default class SpeedreaderReader extends Component {
   buildDisplayUnits() {
     const words = this.words;
     if (!this.chunkMode) {
-      this.displayUnits = words.map((w, i) => ({ text: w, start: i }));
+      this.displayUnits = words.map((w, i) => ({ text: w, start: i, prefixLen: 0 }));
       return;
     }
     const shortSet = new Set(this.chunkWordsList.map((w) => w.toLowerCase()));
@@ -136,13 +136,19 @@ export default class SpeedreaderReader extends Component {
       const w = words[i];
       const bare = w.toLowerCase().replace(/[^\p{L}]/gu, "");
       if (shortSet.has(bare) && w.length <= 4 && i + 1 < words.length) {
-        out.push({ text: w + " " + words[i + 1], start: i });
+        // Non-breaking space (U+00A0) instead of a plain space: a regular
+        // space can end up right at the edge of the "before"/"after" flex
+        // span and gets silently collapsed away by normal HTML whitespace
+        // rules, making the two words look jammed together with no gap.
+        const prefix = w + "\u00A0";
+        out.push({ text: prefix + words[i + 1], start: i, prefixLen: prefix.length });
         i++;
       } else {
-        out.push({ text: w, start: i });
+        out.push({ text: w, start: i, prefixLen: 0 });
       }
     }
     this.displayUnits = out;
+    // after rebuilding units, ensure the selected page still follows the current index
     this.updateSelectedPage();
   }
 
@@ -169,19 +175,39 @@ export default class SpeedreaderReader extends Component {
 
   get pivotSplit() {
     const word = this.currentUnit.text;
-    const len = word.length;
+    const prefixLen = this.currentUnit.prefixLen || 0;
+    // The ORP (pivot letter) is always computed on the real content word,
+    // never on a chunked-in short filler word (or the space joining them)
+    // — otherwise the highlight can land on "a" or on the gap itself.
+    const contentWord = word.slice(prefixLen);
+    const len = contentWord.length;
     let p;
     if (len <= 1) p = 0;
     else if (len <= 3) p = 1;
     else if (len <= 7) p = 2;
     else if (len <= 11) p = 3;
     else p = 4;
-    p = Math.min(p, Math.max(0, len - 1));
+    p = Math.min(p, Math.max(len - 1, 0));
+    const pivotIndex = prefixLen + p;
     return {
-      before: word.slice(0, p),
-      pivot: word.slice(p, p + 1),
-      after: word.slice(p + 1),
+      before: word.slice(0, pivotIndex),
+      pivot: word.slice(pivotIndex, pivotIndex + 1),
+      after: word.slice(pivotIndex + 1),
     };
+  }
+
+  // Long words (compound Hungarian words especially) can overflow their
+  // half of the word box at larger font sizes / narrower screens. Scale
+  // the font size down per-word once it passes a length threshold, so the
+  // whole word always stays visible instead of being clipped.
+  get wordFontSizeStyle() {
+    const len = this.currentUnit.text.length;
+    const threshold = 13;
+    let scale = 1;
+    if (len > threshold) {
+      scale = Math.max(0.4, threshold / len);
+    }
+    return htmlSafe(`font-size: calc(var(--sr-font-size) * ${scale})`);
   }
 
   get totalWords() {
@@ -499,14 +525,29 @@ export default class SpeedreaderReader extends Component {
       <div class="sr-stage">
         <div class="sr-guide sr-guide-top"></div>
         <div class="sr-word-row">
-          <span class="sr-word-before">{{this.pivotSplit.before}}</span><span
+          <span
+            class="sr-word-before"
+            style={{this.wordFontSizeStyle}}
+          >
+            {{this.pivotSplit.before}}
+          </span>
+          <span
             class="sr-word-pivot"
-          >{{this.pivotSplit.pivot}}</span><span class="sr-word-after">{{this.pivotSplit.after}}</span>
+            style={{this.wordFontSizeStyle}}
+          >
+            {{this.pivotSplit.pivot}}
+          </span>
+          <span
+            class="sr-word-after"
+            style={{this.wordFontSizeStyle}}
+          >
+            {{this.pivotSplit.after}}
+          </span>
         </div>
         <div class="sr-guide sr-guide-bottom"></div>
         <div class="sr-meta-row">
           <span>{{this.wordsProgressText}}</span>
-          <span>{{dIcon "clock"}} {{this.timeRemainingText}}</span>
+          <span>{{this.timeRemainingText}}</span>
         </div>
       </div>
 
