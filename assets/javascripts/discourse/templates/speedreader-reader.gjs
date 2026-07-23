@@ -14,9 +14,21 @@ import { i18n } from "discourse-i18n";
 
 const SENTENCE_END_RE = /[.!?…]$/;
 
+let offscreenCanvas = null;
+
+function getExactTextWidth(text, fontStyle) {
+  if (!offscreenCanvas) {
+    offscreenCanvas = document.createElement("canvas");
+  }
+  const ctx = offscreenCanvas.getContext("2d");
+  ctx.font = fontStyle;
+  return ctx.measureText(text).width;
+}
+
 export default class SpeedreaderReader extends Component {
   @service siteSettings;
 
+  @tracked fontFamily = "Inter, Arial, sans-serif";
   words = this.args.model.words || [];
   pages = this.args.model.pages || [];
 
@@ -75,6 +87,10 @@ export default class SpeedreaderReader extends Component {
     const applied = Math.min(4.0, Math.max(1.0, +this.fontSize));
     this.fontSize = applied;
     el.style.setProperty("--sr-font-size", `${this.fontSize}rem`);
+
+    const style = getComputedStyle(el);
+    const varFont = style.getPropertyValue("--font-family").trim();
+    this.fontFamily = varFont || style.fontFamily || "Inter, Arial, sans-serif";
   }
 
   @action
@@ -145,10 +161,6 @@ export default class SpeedreaderReader extends Component {
       const w = words[i];
       const bare = w.toLowerCase().replace(/[^\p{L}]/gu, "");
       if (shortSet.has(bare) && w.length <= 4 && i + 1 < words.length) {
-        // Non-breaking space (U+00A0) instead of a plain space: a regular
-        // space can end up right at the edge of the "before"/"after" flex
-        // span and gets silently collapsed away by normal HTML whitespace
-        // rules, making the two words look jammed together with no gap.
         const prefix = w + "\u00A0";
         out.push({ text: prefix + words[i + 1], start: i, prefixLen: prefix.length });
         i++;
@@ -157,7 +169,6 @@ export default class SpeedreaderReader extends Component {
       }
     }
     this.displayUnits = out;
-    // after rebuilding units, ensure the selected page still follows the current index
     this.updateSelectedPage();
   }
 
@@ -205,31 +216,35 @@ export default class SpeedreaderReader extends Component {
   get wordFontSizeStyle() {
     const len = this.currentUnit.text.length;
     if (len === 0) return htmlSafe("");
-  
+
     const rootFontSize =
       parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-  
+
     const isMobile = this.viewportWidth < 520;
     const totalPaddingEm = isMobile ? 4.0 : 4.5;
-  
     const totalPaddingPx = rootFontSize * totalPaddingEm;
-    const stageWidth = Math.min(this.viewportWidth, 760) - totalPaddingPx;    
-    const halfWidth = stageWidth / 2;  
-    
-    const { before, pivot, after } = this.pivotSplit;
 
-    const maxHalfLen = Math.max(before.length, after.length) + pivot.length;
-  
-    const AVG_CHAR_WIDTH_EM = 0.54;
-  
-    const targetHalfPx =
-      maxHalfLen * (this.fontSize * rootFontSize * AVG_CHAR_WIDTH_EM);
-  
+    const stageWidth = Math.min(this.viewportWidth, 760) - totalPaddingPx;
+    const halfWidth = stageWidth / 2;
+
+    const { before, pivot, after } = this.pivotSplit;
+    const leftText = before + pivot;
+    const rightText = pivot + after;
+
+    const targetPx = this.fontSize * rootFontSize;
+
+    const fontSpec = `bold ${targetPx}px ${this.fontFamily}`;
+
+    const leftPx = getExactTextWidth(leftText, fontSpec);
+    const rightPx = getExactTextWidth(rightText, fontSpec);
+
+    const maxHalfPx = Math.max(leftPx, rightPx);
+
     let scale = 1;
-    if (targetHalfPx > halfWidth) {
-      scale = Math.max(0.35, halfWidth / targetHalfPx);
+    if (maxHalfPx > halfWidth) {
+      scale = Math.max(0.35, halfWidth / maxHalfPx);
     }
-  
+
     return htmlSafe(`font-size: calc(var(--sr-font-size) * ${scale})`);
   }
 
