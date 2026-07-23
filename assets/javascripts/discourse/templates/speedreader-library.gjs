@@ -126,7 +126,7 @@ export default class SpeedreaderLibrary extends Component {
     <div class="speedreader">
       <div class="sr-upload-row">
         <label class="btn btn-primary" for="speedreader-pdf-input">
-          {{i18n "speedreader.library.upload_button"}}
+          {{dIcon "upload"}} {{i18n "speedreader.library.upload_button"}}
         </label>
         <input
           type="file"
