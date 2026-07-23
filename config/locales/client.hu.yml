@@ -9,7 +9,7 @@ hu:
         upload_button: "Feltöltés"
         uploading: "Feltöltés… %{percent}%"
         processing: "Feldolgozás: %{page} / %{total}. oldal…"
-        empty: "Még nincs feltöltött könyved — tölts fel egy PDF-et fent."
+        empty: "Még nincs feltöltött könyved - tölts fel egyet fent."
         continue_reading: "Folytatás"
         start_reading: "Olvasás"
         delete: "Törlés"
