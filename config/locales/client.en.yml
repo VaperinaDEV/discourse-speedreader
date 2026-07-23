@@ -9,7 +9,7 @@ en:
         upload_button: "Upload"
         uploading: "Uploading… %{percent}%"
         processing: "Processing page %{page} of %{total}…"
-        empty: "You haven't uploaded any books yet — upload a PDF above to get started."
+        empty: "You haven't uploaded any books yet - upload above to get started."
         continue_reading: "Continue"
         start_reading: "Read"
         delete: "Delete"
