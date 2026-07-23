@@ -206,10 +206,16 @@ export default class SpeedreaderReader extends Component {
     const len = this.currentUnit.text.length;
     if (len === 0) return htmlSafe("");
 
-    const stageWidth = Math.min(this.viewportWidth, 760) - 40; // matches .speedreader max-width/padding
-    const halfWidth = stageWidth * 0.42; // leaves room for the pivot letter + guide margins
+    // Horizontal chrome to subtract: .speedreader's own padding (1em each
+    // side) + .sr-stage's padding (20px each side) — both wrap the word
+    // row, so both eat into the space actually available to it.
+    const OUTER_PADDING_PX = 32; // .speedreader: padding 1em each side (~16px)
+    const STAGE_PADDING_PX = 40; // .sr-stage: padding 20px each side
+    const stageWidth =
+      Math.min(this.viewportWidth, 760) - OUTER_PADDING_PX - STAGE_PADDING_PX;
+    const halfWidth = stageWidth * 0.4; // leaves room for the pivot letter + guide margins
     const REM_PX = 16;
-    const AVG_CHAR_WIDTH_EM = 0.55; // rough average glyph width for the reader's serif font
+    const AVG_CHAR_WIDTH_EM = 0.62; // bold/semibold serif glyphs run wider than regular weight
     const charPx = this.fontSize * REM_PX * AVG_CHAR_WIDTH_EM;
     const maxChars = Math.max(3, Math.floor(halfWidth / charPx));
 
